@@ -111,19 +111,77 @@
   .subject-pages-edit label{margin-bottom:0; font-size:13px; color:var(--ink-soft); white-space:nowrap;}
   .subject-pages-edit input{width:110px;}
 
-  .subject-edit-row{
-    display:flex; align-items:center; gap:10px; flex-wrap:nowrap;
-    padding:10px 12px; border-radius:10px; background:#FAFBFA; border:1px solid var(--line);
+  .subject-edit-block{display:flex; flex-direction:column; gap:5px; padding:8px 10px; border-radius:10px; background:#FAFBFA; border:1px solid var(--line);}
+  .ser-line{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .ser-name-input{flex:1 1 90px; min-width:80px; font-weight:600; font-size:14px; padding:5px 8px;}
+  .ser-f{display:flex; align-items:center; gap:4px; margin:0; font-size:12px; color:var(--ink-soft); white-space:nowrap;}
+  .ser-f input{width:58px; padding:5px 6px; font-size:13px;}
+  .ser-f input.ser-narrow{width:42px;}
+  .ser-line .ser-delete{flex:0 0 auto; white-space:nowrap; font-size:12px; padding:2px 6px;}
+  .ser-days-line{display:flex; align-items:center; justify-content:flex-start; gap:6px 14px; flex-wrap:wrap;}
+  .ser-days{display:flex; align-items:center; gap:2px; flex-wrap:nowrap;}
+  .ser-days-label{font-size:11px; color:var(--ink-soft); margin-right:2px; white-space:nowrap;}
+  .ser-day{padding:2px 7px; font-size:11px; line-height:1.4; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer;}
+  .ser-day.on{background:#2F6F4F; border-color:#2F6F4F; color:#fff; font-weight:600;}
+  .ser-alt-toggle{margin-left:6px; padding:2px 9px; font-size:11px; line-height:1.4; border-radius:12px; border:1px dashed var(--line); background:transparent; color:var(--ink-soft); font-weight:500; cursor:pointer;}
+  .ser-alt-toggle.on{border:1px solid #D98E3B; background:#F6E7D2; color:#8A5A00; font-weight:600;}
+  #subjectEditList{display:flex; flex-direction:column; gap:8px;}
+
+  /* ---- 공부 달력 ---- */
+  .cal-head{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .cal-title{flex:1; text-align:center; font-weight:600; font-size:16px;}
+  .cal-today-btn{padding:7px 12px; font-size:12px;}
+  .cal-summary{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; font-size:12px;}
+  .cal-badge{padding:3px 10px; border-radius:12px; font-weight:600;}
+  .cal-legend{display:flex; gap:6px 14px; flex-wrap:wrap; font-size:12px; color:var(--ink-soft); margin-bottom:12px;}
+  .cal-legend i{display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+  .cal-weekdays, .cal-grid{display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px;}
+  .cal-weekdays span{text-align:center; font-size:12px; color:var(--ink-soft); padding:4px 0;}
+  .cal-cell{
+    min-height:104px; border:1px solid var(--line); border-radius:8px; padding:4px 5px; background:#FBFCFB;
+    display:flex; flex-direction:column; justify-content:space-between; gap:2px; cursor:pointer; overflow:hidden;
   }
-  .subject-edit-row .ser-name{flex:1 1 auto; min-width:0; font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .ser-reorder{display:flex; flex-direction:column; gap:1px; flex:0 0 auto;}
-  .ser-move{padding:1px 6px; font-size:9px; line-height:1.4; background:var(--card); color:var(--ink-soft); border:1px solid var(--line); border-radius:4px;}
-  .ser-move:disabled{opacity:0.3;}
-  .ser-name-input{flex:1 1 auto; min-width:64px; font-weight:600; font-size:14px; padding:7px 8px;}
-  .ser-field-inline{display:flex; align-items:center; gap:6px; flex:0 0 auto;}
-  .ser-field-inline label{margin-bottom:0; font-size:12px; color:var(--ink-soft); white-space:nowrap;}
-  .ser-field-inline input{width:64px; padding:7px 8px; font-size:14px;}
-  .subject-edit-row .ser-delete{flex:0 0 auto; white-space:nowrap; font-size:12px;}
+  .cal-cell.cal-blank{border:none; background:none; cursor:default;}
+  .cal-top{display:flex; justify-content:space-between; align-items:baseline; font-size:12px; font-weight:600;}
+  .cal-icon{font-size:12px; font-weight:700;}
+  .cal-chips{display:flex; flex-direction:column; gap:2px; margin-top:2px;}
+  .cal-chip{display:flex; justify-content:space-between; align-items:center; gap:4px; border-radius:5px; padding:1px 5px; font-size:10.5px; line-height:1.4; font-weight:600; white-space:nowrap; overflow:hidden;}
+  .cal-chip .nm-short{display:none;}
+  .cal-chip-n{font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:10px;}
+  .cal-chip-ok{background:#2F6F4F; color:#fff;}
+  .cal-chip-part{background:#F0B866; color:#5A3A00;}
+  .cal-chip-miss{background:#E7A090; color:#6B1F10;}
+  .cal-chip-pending{background:#E9EEEB; color:var(--ink-soft);}
+  .cal-chip-bonus{background:#DCEBE3; color:var(--progress);}
+  .cal-achieved{background:#C9E6D5; border-color:#2F6F4F; box-shadow:inset 0 0 0 1px #2F6F4F;}
+  .cal-achieved .cal-icon{color:var(--progress); font-size:14px;}
+  .cal-achieved .cal-top > span:first-child{color:var(--progress);}
+  .cal-partial{background:var(--goal-soft); border-color:#E8C48F;}
+  .cal-partial .cal-icon{color:#B26A00;}
+  .cal-missed{background:var(--behind-soft); border-color:#E3A99A;}
+  .cal-missed .cal-icon{color:var(--behind);}
+  .cal-rest, .cal-out, .cal-pre{background:#F3F5F4; color:var(--ink-soft);}
+  .cal-future{background:#fff;}
+  .cal-today{outline:2px solid var(--ink); outline-offset:-1px; background:#fff;}
+  .cal-selected{box-shadow:0 0 0 2px #3B6FA0;}
+  .cal-achieved.cal-selected{box-shadow:inset 0 0 0 1px #2F6F4F, 0 0 0 2px #3B6FA0;}
+  .rc-count{font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; text-align:center;}
+  .rc-bar{height:6px; background:rgba(27,43,41,0.12); border-radius:3px; overflow:hidden; margin-top:3px;}
+  .rc-bar > i{display:block; height:100%; background:#2F6F4F; border-radius:3px;}
+  .rc-pct{font-size:10px; text-align:center; color:var(--ink-soft); margin-top:2px;}
+  .cal-detail{margin-top:14px; font-size:13px; line-height:1.7;}
+  .cal-detail-box{border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:#FBFCFB;}
+  .cal-detail-title{font-weight:600; margin-bottom:6px;}
+  .cal-detail-row{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .cal-ok{color:var(--progress); font-weight:600;}
+  .cal-no{color:var(--behind); font-weight:600;}
+  @media (max-width:520px){
+    .cal-cell{min-height:82px; padding:3px;}
+    .cal-chip{justify-content:center; padding:1px 2px;}
+    .cal-chip .nm-full, .cal-chip-n{display:none;}
+    .cal-chip .nm-short{display:inline;}
+    .cal-weekdays, .cal-grid{gap:3px;}
+  }
   .tab{
     padding:8px 16px; border-radius:20px; border:1px solid var(--line); background:var(--card);
     font-size:14px; font-weight:500; cursor:pointer; color:var(--ink-soft);
@@ -246,6 +304,12 @@
   .empty h2{color:var(--ink); font-size:22px; margin-bottom:10px;}
 
   .section-title{font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:10px;}
+  .period-bar{display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px;}
+  .period-bar .pb-field{flex:0 1 180px; min-width:140px;}
+  .period-bar label{margin-bottom:4px;}
+  .period-bar button{padding:10px 20px;}
+  .pb-hint{flex:1 1 100%; font-size:12px; color:var(--ink-soft); line-height:1.55;}
+  .dday-cap{font-size:11px; color:var(--ink-soft); text-align:right; margin-top:4px; white-space:nowrap;}
   .day-count-badge{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--progress); background:var(--progress-soft); padding:2px 8px; border-radius:10px; font-weight:600;}
 
   .summary-stats{display:flex; flex-direction:column; gap:14px;}
@@ -386,6 +450,19 @@
   <!-- 대시보드 -->
   <div id="dashboardView" class="hidden stack">
 
+    <div class="period-bar">
+      <div class="pb-field">
+        <label for="startDateTop">공부 시작일</label>
+        <input type="date" id="startDateTop">
+      </div>
+      <div class="pb-field">
+        <label for="endDateTop">공부 종료일</label>
+        <input type="date" id="endDateTop">
+      </div>
+      <button type="button" id="applyPeriodBtn">적용</button>
+      <div class="pb-hint">오른쪽 위 D-day는 <b>종료일까지</b> 남은 날이에요. 진도 계산은 시작일부터 종료일 사이의 <b>공부 요일(월~금)</b>만 세요. 시작 전에 이미 읽은 분량은 아래 "과목별 페이지 설정"의 <b>기존</b>에 넣어두세요.</div>
+    </div>
+
     <div class="view-switch">
       <button type="button" class="view-switch-btn active" id="viewProgressBtn">진도율</button>
       <button type="button" class="view-switch-btn" id="viewReviewBtn">1-4-7-14 복습 체크리스트</button>
@@ -400,9 +477,13 @@
 
     <div class="card">
       <div class="section-title">오늘의 목표 · <span id="todayDateLabel"></span> <span id="dayCountLabel" class="day-count-badge"></span></div>
-      <div style="max-width:220px; margin-bottom:18px;">
-        <label for="logDate">기록할 날짜 <span id="logDateWeekday" class="weekday-badge"></span></label>
-        <input type="date" id="logDate">
+      <div style="margin-bottom:18px; display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap;">
+        <div style="width:200px;">
+          <label for="logDate">기록할 날짜 <span id="logDateWeekday" class="weekday-badge"></span></label>
+          <input type="date" id="logDate">
+        </div>
+        <button type="button" id="logDateApplyBtn" style="padding:10px 16px;">적용하기</button>
+        <button type="button" class="subtle" id="logDateTodayBtn" style="padding:10px 14px;">오늘</button>
       </div>
       <div id="allGoalsList" class="subject-progress-grid"></div>
       <div class="carry-note" style="margin-top:16px;">오늘 목표를 못 채우면, 남은 분량이 내일 목표에 자동으로 더해져요.</div>
@@ -419,30 +500,6 @@
     </div>
 
     <div class="card">
-      <div class="row" style="align-items:flex-end;">
-        <div>
-          <label for="repeatCountLive">목표 회독수</label>
-          <input type="number" id="repeatCountLive" min="1">
-        </div>
-        <div>
-          <label for="startDateLive">시작일</label>
-          <input type="date" id="startDateLive">
-        </div>
-        <div>
-          <label for="endDateLive">종료일</label>
-          <input type="date" id="endDateLive">
-        </div>
-      </div>
-      <div style="display:flex; gap:10px; margin-top:14px; align-items:center; flex-wrap:wrap;">
-        <button type="button" id="recalcBtn">계산하기</button>
-        <button type="button" class="link-btn" id="exportBackupBtn">내보내기</button>
-        <button type="button" class="link-btn" id="importBackupBtn">가져오기</button>
-        <input type="file" id="importBackupFile" accept="application/json" class="hidden">
-        <button type="button" class="link-btn" id="resetDefaultBtn" style="color:var(--behind);">기본값으로 재설정</button>
-      </div>
-    </div>
-
-    <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <div class="section-title" style="margin-bottom:0;">과목별 페이지 설정</div>
         <div style="display:flex; gap:10px; align-items:center;">
@@ -456,9 +513,38 @@
         <button type="button" class="subtle" id="cancelAddSubjectBtn">취소</button>
       </div>
       <div style="font-size:12px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">
-        "기존 진행 페이지"는 앱을 쓰기 전에 이미 읽은 페이지 번호예요. 특정 날짜의 기록으로 남기지 않고 별도로 반영되기 때문에, 하루 만에 다 읽은 것처럼 기록에 남지 않아요. 값을 입력한 뒤 위 "적용하기"를 눌러야 반영돼요.
+        "격주 교대"를 켜면 시작일이 속한 주(시작일이 일요일이면 그다음 주)를 첫 주로 해서 첫 주 요일 → 다음 주 요일 순서로 번갈아요. "목표 회독"은 과목마다 따로 정해요. "현재 회독 · 기존 페이지"는 앱을 쓰기 전에 이미 읽은 위치예요 (예: 2회독 50p). 특정 날짜의 기록으로 남기지 않고 별도로 반영되기 때문에, 하루 만에 다 읽은 것처럼 기록에 남지 않아요. 값을 입력한 뒤 위 "적용하기"를 눌러야 반영돼요.
       </div>
       <div id="subjectEditList" class="subject-progress-grid"></div>
+      <div style="display:flex; gap:14px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); align-items:center; flex-wrap:wrap;">
+        <button type="button" class="link-btn" id="exportBackupBtn">내보내기</button>
+        <button type="button" class="link-btn" id="importBackupBtn">가져오기</button>
+        <input type="file" id="importBackupFile" accept="application/json" class="hidden">
+        <button type="button" class="link-btn" id="resetDefaultBtn" style="color:var(--behind);">기본값으로 재설정</button>
+      </div>
+    </div>
+
+    <div class="card" id="calendarCard">
+      <div class="section-title">공부 달력</div>
+      <div class="cal-head">
+        <button type="button" class="tab-arrow" id="calPrevBtn" aria-label="이전 달">‹</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button type="button" class="tab-arrow" id="calNextBtn" aria-label="다음 달">›</button>
+        <button type="button" class="subtle cal-today-btn" id="calTodayBtn">오늘</button>
+      </div>
+      <div id="calMonthSummary" class="cal-summary"></div>
+      <div class="cal-legend">
+        <span><i style="background:#2F6F4F;"></i>과목 달성</span>
+        <span><i style="background:#F0B866;"></i>일부</span>
+        <span><i style="background:#E7A090;"></i>못 함</span>
+        <span><i style="background:#E9EEEB;"></i>예정·진행 전</span>
+        <span><i style="background:#C9E6D5; border:2px solid #2F6F4F;"></i>✓ 그날 전체 달성</span>
+        <span><i style="background:#fff; border:2px solid var(--ink);"></i>● 오늘(진행 중)</span>
+        <span><i style="background:#F3F5F4; border:1px solid var(--line);"></i>쉬는 날 · 기록 전</span>
+      </div>
+      <div class="cal-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+      <div id="calendarGrid" class="cal-grid"></div>
+      <div id="calDayDetail" class="cal-detail"></div>
     </div>
 
     </div>
@@ -466,8 +552,16 @@
     <div id="reviewTabContent" class="stack hidden">
       <div class="card review-hero-card">
         <div class="section-title">1-4-7-14 복습 체크리스트 · <span id="reviewDateLabel"></span></div>
+        <div style="margin-bottom:14px; display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap;">
+          <div style="width:200px;">
+            <label for="reviewDateInput" style="color:#8A6D00;">복습할 날짜 <span id="reviewDateWeekday" class="weekday-badge"></span></label>
+            <input type="date" id="reviewDateInput">
+          </div>
+          <button type="button" id="reviewDateApplyBtn" style="padding:10px 16px;">적용하기</button>
+          <button type="button" class="subtle" id="reviewDateTodayBtn" style="padding:10px 14px;">오늘</button>
+        </div>
         <div style="font-size:13px; color:#8A6D00; margin-bottom:16px; line-height:1.5;">
-          오늘은 1일 전 · 4일 전 · 7일 전 · 14일 전에 공부하기로 계획했던 내용을 복습하는 날이에요. 실제로 그날 공부했는지와 상관없이, 원래 계획대로라면 그날 나갔어야 할 분량을 기준으로 보여줘요.
+          1일 전 · 4일 전 · 7일 전 · 14일 전에 <b>실제로 공부해서 기록한 분량</b>을 복습하는 날이에요. 그날 기록이 없으면 복습할 내용도 없어요. 기록을 수정하면 복습 범위도 같이 바뀌어요.
         </div>
         <div id="reviewChecklist" class="subject-progress-grid"></div>
       </div>
@@ -499,6 +593,27 @@
             <tbody id="reviewFullGrid"></tbody>
           </table>
         </div>
+      </div>
+
+      <div class="card" id="reviewCalendarCard">
+        <div class="section-title">복습 달력 · 날짜별 복습 진도율</div>
+        <div class="cal-head">
+          <button type="button" class="tab-arrow" id="rcPrevBtn" aria-label="이전 달">‹</button>
+          <div class="cal-title" id="rcTitle"></div>
+          <button type="button" class="tab-arrow" id="rcNextBtn" aria-label="다음 달">›</button>
+          <button type="button" class="subtle cal-today-btn" id="rcTodayBtn">오늘</button>
+        </div>
+        <div id="rcSummary" class="cal-summary"></div>
+        <div class="cal-legend">
+          <span><i style="background:#C9E6D5; border:2px solid #2F6F4F;"></i>✓ 그날 복습 전부 완료</span>
+          <span><i style="background:#F6E7D2;"></i>△ 일부 완료</span>
+          <span><i style="background:#F5DED7;"></i>✕ 못 함</span>
+          <span><i style="background:#fff; border:2px solid var(--ink);"></i>● 오늘(진행 중)</span>
+          <span><i style="background:#F3F5F4; border:1px solid var(--line);"></i>복습할 것 없음</span>
+        </div>
+        <div class="cal-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+        <div id="rcGrid" class="cal-grid"></div>
+        <div id="rcDetail" class="cal-detail"></div>
       </div>
     </div>
 
@@ -564,10 +679,128 @@ const alert = showToast;
 function toDate(str){ const [y,m,d] = str.split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); }
 function fmt(d){ return d.toISOString().slice(0,10); }
 function todayUTC(){ const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); }
+// '기록할 날짜'로 고른 날. 비어 있으면 진짜 오늘. 오늘의 목표·복습 체크리스트는 이 날짜를 '오늘'처럼 기준으로 삼아요.
+let appliedDateStr = null;
+function viewDate(){
+  return (appliedDateStr && /^\d{4}-\d{2}-\d{2}$/.test(appliedDateStr)) ? toDate(appliedDateStr) : todayUTC();
+}
 function diffDays(a,b){ return Math.round((b - a) / 86400000); }
 function md(str){ const [,m,d] = str.split('-'); return `${parseInt(m)}.${parseInt(d)}`; }
+function cleanName(n){ return String(n).replace(/[<>"&]/g, '').trim(); }
 function koreanDateLabel(d){ return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일`; }
 const KOREAN_WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+// ---------- study-day helpers (과목별 공부 요일) ----------
+// Each subject has studyDays: weekday numbers (0=일 ... 6=토) it is actually studied on.
+// Progress goals are spread over THOSE days only, so weekends (or any rest day) don't
+// count against the pace. Default: 월~금. 경영학 월수금 / 사회보험 화목 are applied by ensureStudyDays().
+const WEEKDAYS_MON_FRI = [1, 2, 3, 4, 5];
+const DEFAULT_STUDY_DAYS_BY_ID = { s_biz657: [1, 3, 5], s_social470: [2, 4] };
+// 격주 교대: 첫 주에 월수금이면 다음 주는 화목 (경영학 ↔ 사회보험법이 번갈아 바뀜)
+const DEFAULT_ALT_STUDY_DAYS_BY_ID = { s_biz657: [2, 4], s_social470: [1, 3, 5] };
+function defaultAltStudyDaysFor(subject){
+  if(DEFAULT_ALT_STUDY_DAYS_BY_ID[subject.id]) return DEFAULT_ALT_STUDY_DAYS_BY_ID[subject.id].slice();
+  const name = subject.name || '';
+  if(name.includes('경영')) return [2, 4];
+  if(name.includes('사회보험')) return [1, 3, 5];
+  return null;
+}
+
+function defaultStudyDaysFor(subject){
+  if(DEFAULT_STUDY_DAYS_BY_ID[subject.id]) return DEFAULT_STUDY_DAYS_BY_ID[subject.id].slice();
+  const name = subject.name || '';
+  if(name.includes('경영')) return [1, 3, 5];
+  if(name.includes('사회보험')) return [2, 4];
+  return WEEKDAYS_MON_FRI.slice();
+}
+// Fills in studyDays for any subject saved before this feature existed (keeps all logs untouched).
+function ensureStudyDays(){
+  if(!plan || !Array.isArray(plan.subjects)) return;
+  plan.subjects.forEach(s => {
+    if(!Array.isArray(s.studyDays) || !s.studyDays.length){
+      s.studyDays = defaultStudyDaysFor(s);
+    }
+    // studyDaysAlt: 다음 주(격주) 요일. undefined=아직 설정 안 함 → 기본값, null=격주 안 씀
+    if(s.studyDaysAlt === undefined) s.studyDaysAlt = defaultAltStudyDaysFor(s);
+    if(Array.isArray(s.studyDaysAlt) && !s.studyDaysAlt.length) s.studyDaysAlt = null;
+  });
+}
+// 과목별 목표 회독수가 없던 옛 데이터: 기존 전체 회독수(plan.repeats)를 각 과목에 복사해 둠.
+function ensureRepeats(){
+  if(!plan || !Array.isArray(plan.subjects)) return;
+  plan.subjects.forEach(s => {
+    if(!(parseInt(s.repeats, 10) >= 1)) s.repeats = Math.max(1, parseInt(plan.repeats, 10) || 1);
+  });
+}
+function subjectStudyDays(subject){
+  return (Array.isArray(subject.studyDays) && subject.studyDays.length) ? subject.studyDays : WEEKDAYS_MON_FRI;
+}
+function subjectAltDays(subject){
+  return (Array.isArray(subject.studyDaysAlt) && subject.studyDaysAlt.length) ? subject.studyDaysAlt : null;
+}
+// 격주 기준: 시작일이 속한 주(월~일)가 '첫 주'. 시작일이 일요일이면 바로 다음 날(월)부터가 첫 주.
+let _anchorKey = null, _anchorVal = 0;
+function anchorMondayNum(){
+  if(_anchorKey !== plan.startDate){
+    let n = Math.round(toDate(plan.startDate).getTime() / 86400000);
+    if(((n + 4) % 7) === 0) n += 1;            // 일요일 -> 월요일
+    _anchorVal = n - ((((n + 4) % 7) + 6) % 7); // 그 주의 월요일
+    _anchorKey = plan.startDate;
+  }
+  return _anchorVal;
+}
+function dayMask(days){ let m = 0; days.forEach(d => { m |= (1 << d); }); return m; }
+function masksFor(subject){
+  const alt = subjectAltDays(subject);
+  return [dayMask(subjectStudyDays(subject)), alt ? dayMask(alt) : null];
+}
+// dayNum = UTC 날짜를 일 단위 숫자로 (1970-01-01 = 목요일)
+function studiedOnDayNum(masks, dayNum){
+  const wd = (dayNum + 4) % 7;                       // 0=일 ... 6=토
+  let mask = masks[0];
+  if(masks[1] !== null){
+    const weekIdx = Math.floor((dayNum - ((wd + 6) % 7) - anchorMondayNum()) / 7);
+    if(weekIdx & 1) mask = masks[1];
+  }
+  return (mask >> wd) & 1;
+}
+function dateNum(d){ return Math.round(d.getTime() / 86400000); }
+// 그 날짜가 속한 주에 적용되는 요일 목록
+function studyDaysForDate(subject, date){
+  const alt = subjectAltDays(subject);
+  if(!alt) return subjectStudyDays(subject);
+  const n = dateNum(date);
+  const wd = (n + 4) % 7;
+  const weekIdx = Math.floor((n - ((wd + 6) % 7) - anchorMondayNum()) / 7);
+  return (weekIdx & 1) ? alt : subjectStudyDays(subject);
+}
+function studyDaysLabel(subject, date){
+  const days = studyDaysForDate(subject, date || todayUTC()).slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)); // 월요일부터
+  return days.map(d => KOREAN_WEEKDAYS[d]).join('·') + (subjectAltDays(subject) ? ' (이번 주, 격주 교대)' : '');
+}
+function isStudyDay(subject, date){
+  return !!studiedOnDayNum(masksFor(subject), dateNum(date));
+}
+// Number of this subject's study days within [a, b] (inclusive).
+function countStudyDays(subject, a, b){
+  if(b < a) return 0;
+  const masks = masksFor(subject);
+  const from = dateNum(a), to = dateNum(b);
+  let count = 0;
+  for(let n = from; n <= to; n++) count += studiedOnDayNum(masks, n);
+  return count;
+}
+// The date of the n-th study day AFTER `from` (n >= 1). Used to project completion dates.
+function addStudyDays(subject, from, n){
+  const d = new Date(from);
+  let left = n, guard = 0;
+  while(left > 0 && guard < 10000){
+    d.setUTCDate(d.getUTCDate() + 1);
+    guard++;
+    if(isStudyDay(subject, d)) left--;
+  }
+  return d;
+}
 
 const MOTIVATION_QUOTES = [
   '지금 이 순간에도 경쟁자는 책장을 넘기고 있어요.',
@@ -611,7 +844,40 @@ function updateLogDateWeekday(){
   $('logDateWeekday').textContent = `(${KOREAN_WEEKDAYS[d.getUTCDay()]})`;
 }
 $('logDate').addEventListener('input', updateLogDateWeekday);
-$('logDate').addEventListener('change', updateLogDateWeekday);
+// 날짜를 바꾸면 그 날짜를 '오늘'처럼 보고 목표·진행률·복습 체크리스트·달력을 다시 그림
+function applyDate(v){
+  if(!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) v = fmt(todayUTC());
+  appliedDateStr = v;
+  $('logDate').value = v;
+  updateLogDateWeekday();
+  syncReviewDateInput();
+  if(!plan) return;
+  const d = viewDate();
+  calSelected = fmt(d); calYear = d.getUTCFullYear(); calMonth = d.getUTCMonth();
+  renderAllGoals();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderReviewChecklist();
+  renderReviewFullGrid();
+  renderSummaryStats();
+}
+$('logDate').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); applyDate($('logDate').value); } });
+// 복습 탭의 날짜 칸도 같은 날짜(logDate)를 공유해요
+function syncReviewDateInput(){
+  const v = $('logDate').value;
+  $('reviewDateInput').value = v;
+  $('reviewDateWeekday').textContent = v ? `(${KOREAN_WEEKDAYS[toDate(v).getUTCDay()]})` : '';
+}
+function updateReviewDateWeekday(){
+  const v = $('reviewDateInput').value;
+  $('reviewDateWeekday').textContent = v ? `(${KOREAN_WEEKDAYS[toDate(v).getUTCDay()]})` : '';
+}
+$('reviewDateInput').addEventListener('input', updateReviewDateWeekday);
+$('reviewDateInput').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); applyDate($('reviewDateInput').value); } });
+// 날짜를 고른 뒤 '적용하기'를 눌러야 그 날짜로 이동해요
+$('logDateApplyBtn').onclick = () => applyDate($('logDate').value);
+$('reviewDateApplyBtn').onclick = () => applyDate($('reviewDateInput').value);
+$('logDateTodayBtn').onclick = $('reviewDateTodayBtn').onclick = () => applyDate(fmt(todayUTC()));
 // overallIndex: 1-based position counting across all repeats (e.g. 250 with totalPages=200 -> 2회독 50p)
 function bookPosition(overallIndex, totalPages){
   const round = Math.floor((overallIndex - 1) / totalPages) + 1;
@@ -622,7 +888,7 @@ function bookPosition(overallIndex, totalPages){
 // Computes the "○회독 89p ~ 96p" style range text for a subject's remaining today-goal.
 function todayGoalRangeText(subject, st){
   if(st.remainingPages === 0 || st.todayGoal === 0) return '';
-  const repeats = plan.repeats || 1;
+  const repeats = subjectRepeats(subject);
   const startIdx = st.prevCumulative + 1;
   const endIdx = st.todayTargetCumulative;
   const startPos = bookPosition(startIdx, subject.totalPages);
@@ -683,6 +949,8 @@ $('resetDefaultBtn').onclick = async () => {
   $('resetDefaultBtn').textContent = '기본값으로 재설정';
 
   plan = defaultPlan();
+  ensureStudyDays();
+  ensureRepeats();
   logs = {};
   plan.subjects.forEach(s => { logs[s.id] = {}; });
   await savePlan();
@@ -728,6 +996,9 @@ $('importBackupFile').addEventListener('change', async (e) => {
       return;
     }
     plan = data.plan;
+    ensureStudyDays();
+    ensureRepeats();
+  ensureRepeats();
     logs = data.logs || {};
     reviewChecks = data.reviewChecks || {};
     await savePlan();
@@ -742,17 +1013,25 @@ $('importBackupFile').addEventListener('change', async (e) => {
 });
 
 // ---------- computation ----------
-function subjectTarget(subject){ return subject.totalPages * (plan.repeats || 1); }
+// 과목별 목표 회독수 (옛 데이터는 plan.repeats 로 대체)
+function subjectRepeats(subject){ return Math.max(1, parseInt(subject && subject.repeats, 10) || (plan && plan.repeats) || 1); }
+function subjectTarget(subject){ return subject.totalPages * subjectRepeats(subject); }
 
 function subjectStats(subject){
   const start = toDate(plan.startDate);
   const end = toDate(plan.endDate);
   const totalDays = diffDays(start, end) + 1;
   const target = subjectTarget(subject);
-  let today = todayUTC();
+  let today = viewDate();
   const clampedToday = today < start ? start : (today > end ? end : today);
-  const daysPassed = Math.min(Math.max(diffDays(start, clampedToday), 0), totalDays - 1); // full days before "today" bucket, 0-indexed
-  const daysRemaining = totalDays - daysPassed; // includes today
+  // All pacing is counted in this subject's STUDY DAYS (see studyDays), not calendar days.
+  const yesterdayOfClamped = new Date(clampedToday); yesterdayOfClamped.setUTCDate(yesterdayOfClamped.getUTCDate() - 1);
+  const studyTotal = Math.max(countStudyDays(subject, start, end), 1);
+  const studyBeforeToday = countStudyDays(subject, start, yesterdayOfClamped); // study days strictly before today
+  const isStudyToday = isStudyDay(subject, clampedToday);
+  const studyThroughToday = studyBeforeToday + (isStudyToday ? 1 : 0);
+  const daysPassed = studyBeforeToday;
+  const daysRemaining = Math.max(studyTotal - studyBeforeToday, 1); // study days left, includes today when it is one
   const dayLog = logs[subject.id] || {};
   const baseline = subject.baseline || 0;
   const cumulativeThrough = (dateStr) => {
@@ -767,16 +1046,18 @@ function subjectStats(subject){
   // Any shortfall or overshoot naturally carries into tomorrow's recalculation instead.
   const prevCumulative = cumulativeBefore(subject.id, fmt(clampedToday));
   const remainingBeforeToday = Math.max(target - prevCumulative, 0);
-  const todayGoal = remainingBeforeToday > 0 ? Math.ceil(remainingBeforeToday / daysRemaining) : 0;
+  // On a rest day (a weekday this subject isn't scheduled, or a weekend) the goal is 0;
+  // the remaining pages are spread over the study days still ahead.
+  const todayGoal = (remainingBeforeToday > 0 && isStudyToday) ? Math.ceil(remainingBeforeToday / daysRemaining) : 0;
   const todayTargetCumulative = Math.min(prevCumulative + todayGoal, target);
-  const idealCumulativeToday = Math.min(target, target * (daysPassed + 1) / totalDays);
+  const idealCumulativeToday = Math.min(target, target * studyThroughToday / studyTotal);
   const pct = Math.min(100, (doneToDate / target) * 100);
   const idealPct = Math.min(100, (idealCumulativeToday / target) * 100);
-  const flatPace = target / totalDays;
+  const flatPace = target / studyTotal; // pages per study day
   const pageDelta = doneToDate - idealCumulativeToday;
-  const dayDelta = flatPace > 0 ? pageDelta / flatPace : 0;
+  const dayDelta = flatPace > 0 ? pageDelta / flatPace : 0; // behind/ahead, in study days
 
-  return { totalDays, daysPassed, daysRemaining, doneToDate, remainingPages, todayGoal, prevCumulative, todayTargetCumulative, pct, idealPct, pageDelta, dayDelta, clampedToday, target };
+  return { totalDays, studyTotal, studyBeforeToday, studyThroughToday, isStudyToday, daysPassed, daysRemaining, doneToDate, remainingPages, todayGoal, prevCumulative, todayTargetCumulative, pct, idealPct, pageDelta, dayDelta, clampedToday, target };
 }
 
 // ---------- dashboard render ----------
@@ -799,7 +1080,8 @@ function renderTopBar(){
     else if(dLeft <= 7) ddayClass = 'dday-urgent';
     else if(dLeft <= 30) ddayClass = 'dday-soon';
   }
-  $('ddayBadge').innerHTML = `<span class="dday ${ddayClass}">${ddayText}</span>`;
+  const capText = today < start ? `시작일(${md(plan.startDate)})까지` : `종료일(${md(plan.endDate)})까지`;
+  $('ddayBadge').innerHTML = `<span class="dday ${ddayClass}">${ddayText}</span><div class="dday-cap">${capText}</div>`;
 }
 
 // ---------- streak + estimated completion ----------
@@ -837,24 +1119,23 @@ function estimateCompletion(subject, st){
   if(st.remainingPages === 0) return { done: true };
   const baseline = subject.baseline || 0;
   const trackedProgress = st.doneToDate - baseline;
-  const elapsedDays = st.daysPassed + 1;
+  const elapsedDays = st.studyThroughToday; // study days elapsed so far (pace is per study day)
   if(trackedProgress <= 0 || elapsedDays <= 0) return null;
   const pace = trackedProgress / elapsedDays;
   if(pace <= 0) return null;
-  const daysNeeded = Math.ceil(st.remainingPages / pace);
-  const d = new Date(todayUTC());
-  d.setUTCDate(d.getUTCDate() + daysNeeded);
+  const studyDaysNeeded = Math.ceil(st.remainingPages / pace);
+  const d = addStudyDays(subject, viewDate(), studyDaysNeeded);
   return { done: false, date: d, pace };
 }
 
 // For multi-round plans, projects (or looks up, for already-finished rounds) the date
 // each round (1회독, 2회독, ...) finishes, using the same actual-pace logic as estimateCompletion.
 function estimateRoundDates(subject, st){
-  const repeats = plan.repeats || 1;
+  const repeats = subjectRepeats(subject);
   if(repeats <= 1) return [];
   const baseline = subject.baseline || 0;
   const trackedProgress = st.doneToDate - baseline;
-  const elapsedDays = st.daysPassed + 1;
+  const elapsedDays = st.studyThroughToday; // study days elapsed so far
   const pace = (trackedProgress > 0 && elapsedDays > 0) ? trackedProgress / elapsedDays : 0;
 
   const dayLog = logs[subject.id] || {};
@@ -872,9 +1153,8 @@ function estimateRoundDates(subject, st){
       }
       results.push({ round: r, done: true, date: doneDate ? toDate(doneDate) : null });
     } else if(pace > 0){
-      const daysNeeded = Math.ceil((target - st.doneToDate) / pace);
-      const d = new Date(todayUTC());
-      d.setUTCDate(d.getUTCDate() + daysNeeded);
+      const studyDaysNeeded = Math.ceil((target - st.doneToDate) / pace);
+      const d = addStudyDays(subject, viewDate(), studyDaysNeeded);
       results.push({ round: r, done: false, date: d });
     } else {
       results.push({ round: r, done: false, date: null });
@@ -889,11 +1169,18 @@ let celebrationShownForDate = null;
 
 function maybeCelebrateAllGoalsAchieved(){
   if(!plan.subjects.length) return;
-  const todayStr = fmt(todayUTC());
-  const allAchieved = plan.subjects.every(s => {
+  const todayStr = fmt(viewDate());
+  // Only subjects actually scheduled today (and not yet finished) count — rest days
+  // (weekends, or a weekday a subject isn't studied) must not block or trigger the celebration.
+  const activeToday = plan.subjects.filter(s => {
+    const st = subjectStats(s);
+    return st.isStudyToday && st.remainingPages > 0;
+  });
+  if(!activeToday.length) return;
+  const allAchieved = activeToday.every(s => {
     const st = subjectStats(s);
     const doneToday = Number((logs[s.id] || {})[todayStr]) || 0;
-    return st.remainingPages === 0 || (st.todayGoal > 0 && doneToday >= st.todayGoal);
+    return st.todayGoal > 0 && doneToday >= st.todayGoal;
   });
   if(allAchieved && celebrationShownForDate !== todayStr){
     celebrationShownForDate = todayStr;
@@ -924,8 +1211,8 @@ function renderSummaryStats(){
   const streak = computeStreak();
   const inactivityStreak = computeInactivityStreak();
   const planEnd = toDate(plan.endDate);
-  const todayStr = fmt(todayUTC());
-  const yesterday = new Date(todayUTC()); yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const todayStr = fmt(viewDate());
+  const yesterday = new Date(viewDate()); yesterday.setUTCDate(yesterday.getUTCDate() - 1);
   const yesterdayStr = fmt(yesterday);
 
   // Inactivity warning — shown when nothing has been logged for 2+ days in a row.
@@ -996,35 +1283,48 @@ function renderSummaryStats(){
 
   $('summaryStats').innerHTML = warningHtml + streakHtml + totalsHtml + `<div class="summary-eta-list">${etaRows}</div>`;
 
+  renderCalendar(); // every log/plan change already re-renders this summary, so the calendar stays in sync
+
   maybeCelebrateAllGoalsAchieved();
 }
 
 function renderSubjectEditList(){
-  $('subjectEditList').innerHTML = plan.subjects.map((s, i) => {
+  $('subjectEditList').innerHTML = plan.subjects.map(s => {
     const baseline = s.baseline || 0;
     let existingValue = '';
+    let existingRound = '';
     if(baseline > 0){
       const pos = bookPosition(baseline, s.totalPages);
       existingValue = pos.page;
+      existingRound = pos.round;
     }
-    const isFirst = i === 0;
-    const isLast = i === plan.subjects.length - 1;
+    const activeDays = subjectStudyDays(s);
+    const altDays = subjectAltDays(s);
+    // 월~일 순서로 표시 (getUTCDay 기준: 일=0)
+    const chipsFor = (list) => [1, 2, 3, 4, 5, 6, 0].map(d =>
+      `<button type="button" class="ser-day ${list && list.includes(d) ? 'on' : ''}" data-day="${d}">${KOREAN_WEEKDAYS[d]}</button>`
+    ).join('');
+    const dayChips = chipsFor(activeDays);
+    const altChips = chipsFor(altDays);
     return `
-      <div class="subject-edit-row">
-        <div class="ser-reorder">
-          <button type="button" class="ser-move" data-dir="-1" data-subject-id="${s.id}" ${isFirst ? 'disabled' : ''} aria-label="위로">▲</button>
-          <button type="button" class="ser-move" data-dir="1" data-subject-id="${s.id}" ${isLast ? 'disabled' : ''} aria-label="아래로">▼</button>
+      <div class="subject-edit-block">
+        <div class="ser-line">
+          <input type="text" class="ser-name-input" data-subject-id="${s.id}" value="${s.name}">
+          <label class="ser-f">전체<input type="number" class="ser-pages" data-subject-id="${s.id}" min="1" value="${s.totalPages}"></label>
+          <label class="ser-f">목표회독<input type="number" class="ser-repeats ser-narrow" data-subject-id="${s.id}" min="1" value="${subjectRepeats(s)}"></label>
+          <label class="ser-f">현재<input type="number" class="ser-existing-round ser-narrow" data-subject-id="${s.id}" min="1" placeholder="1" value="${existingRound}">회독</label>
+          <label class="ser-f"><input type="number" class="ser-existing" data-subject-id="${s.id}" min="0" placeholder="0" value="${existingValue}">p</label>
+          <button type="button" class="ser-delete danger-text" data-subject-id="${s.id}">삭제</button>
         </div>
-        <input type="text" class="ser-name-input" data-subject-id="${s.id}" value="${s.name}">
-        <div class="ser-field-inline">
-          <label>전체</label>
-          <input type="number" class="ser-pages" data-subject-id="${s.id}" min="1" value="${s.totalPages}">
+        <div class="ser-days-line">
+        <div class="ser-days ser-days-main" data-subject-id="${s.id}">
+          <span class="ser-days-label">공부 요일</span>${dayChips}
+          <button type="button" class="ser-alt-toggle ${altDays ? 'on' : ''}" data-subject-id="${s.id}" title="격주로 요일을 번갈아 써요">격주 교대</button>
         </div>
-        <div class="ser-field-inline">
-          <label>기존</label>
-          <input type="number" class="ser-existing" data-subject-id="${s.id}" min="0" placeholder="0" value="${existingValue}">
+        <div class="ser-days ser-days-alt ${altDays ? '' : 'hidden'}" data-subject-id="${s.id}">
+          <span class="ser-days-label">다음 주</span>${altChips}
         </div>
-        <button type="button" class="ser-delete danger-text" data-subject-id="${s.id}">삭제</button>
+        </div>
       </div>`;
   }).join('');
 }
@@ -1032,23 +1332,25 @@ function renderSubjectEditList(){
 let deleteArmedSubjectId = null;
 let deleteArmTimer = null;
 $('subjectEditList').addEventListener('click', async (e) => {
-  const moveBtn = e.target.closest('.ser-move');
-  if(moveBtn){
-    const subjectId = moveBtn.dataset.subjectId;
-    const dir = parseInt(moveBtn.dataset.dir, 10);
-    const idx = plan.subjects.findIndex(s => s.id === subjectId);
-    const newIdx = idx + dir;
-    if(idx < 0 || newIdx < 0 || newIdx >= plan.subjects.length) return;
-    const [moved] = plan.subjects.splice(idx, 1);
-    plan.subjects.splice(newIdx, 0, moved);
-    await savePlan();
-    renderSubjectEditList();
-    renderSubjectProgressList();
-    renderTodayProgressList();
-    renderAllGoals();
+  const dayBtn = e.target.closest('.ser-day');
+  if(dayBtn){ dayBtn.classList.toggle('on'); return; } // saved when "적용" is pressed
+  const altToggle = e.target.closest('.ser-alt-toggle');
+  if(altToggle){
+    const sid = altToggle.dataset.subjectId;
+    const altRow = document.querySelector(`.ser-days-alt[data-subject-id="${sid}"]`);
+    const turnOn = altRow.classList.contains('hidden');
+    altRow.classList.toggle('hidden', !turnOn);
+    altToggle.classList.toggle('on', turnOn);
+    if(turnOn && !altRow.querySelector('.ser-day.on')){
+      // 처음 켜면 첫 주에 안 쓰는 평일을 미리 채워줌 (월수금 -> 화목)
+      const mainOn = [...document.querySelectorAll(`.ser-days-main[data-subject-id="${sid}"] .ser-day.on`)].map(c => c.dataset.day);
+      altRow.querySelectorAll('.ser-day').forEach(c => {
+        const d = parseInt(c.dataset.day, 10);
+        if(d >= 1 && d <= 5 && !mainOn.includes(String(d))) c.classList.add('on');
+      });
+    }
     return;
   }
-
   const delBtn = e.target.closest('.ser-delete');
   if(!delBtn) return;
   const subjectId = delBtn.dataset.subjectId;
@@ -1095,13 +1397,13 @@ $('cancelAddSubjectBtn').onclick = () => {
 };
 
 async function addSubjectInline(){
-  const name = $('newSubjectName').value.trim();
+  const name = cleanName($('newSubjectName').value);
   if(!name) return;
   if(plan.subjects.some(s => s.name === name)){
     alert('이미 같은 이름의 과목이 있어요.');
     return;
   }
-  const newSubject = { id: 's_' + Math.random().toString(36).slice(2,9), name, totalPages: 1 };
+  const newSubject = { id: 's_' + Math.random().toString(36).slice(2,9), name, totalPages: 1, repeats: 1, studyDays: WEEKDAYS_MON_FRI.slice(), studyDaysAlt: null };
   plan.subjects.push(newSubject);
   logs[newSubject.id] = {};
   await savePlan();
@@ -1134,27 +1436,30 @@ function statusMessage(st, subjectName){
 }
 
 function renderAllGoals(){
-  $('todayDateLabel').textContent = koreanDateLabel(todayUTC());
+  $('todayDateLabel').textContent = koreanDateLabel(viewDate()) + (viewDate().getTime() === todayUTC().getTime() ? ' (오늘)' : ' (선택한 날짜)');
 
   const start = toDate(plan.startDate);
   const end = toDate(plan.endDate);
   const totalDays = diffDays(start, end) + 1;
-  const today = todayUTC();
+  const today = viewDate();
   let dayCountText;
   if(today < start){
     dayCountText = `시작 D-${diffDays(today, start)}`;
   } else {
     const dayNumber = Math.min(diffDays(start, today) + 1, totalDays);
-    dayCountText = `${dayNumber}일째 / 총 ${totalDays}일`;
+    // Weekday (월~금) counter, matching how progress is now paced.
+    const wk = { studyDays: WEEKDAYS_MON_FRI };
+    const wkTotal = countStudyDays(wk, start, end);
+    const wkDone = countStudyDays(wk, start, today > end ? end : today);
+    dayCountText = `시작일부터 ${dayNumber}일째 / 총 ${totalDays}일 · 평일 ${wkDone}/${wkTotal}`;
   }
   $('dayCountLabel').textContent = dayCountText;
 
-  const repeats = plan.repeats || 1;
-
   $('allGoalsList').innerHTML = plan.subjects.map(subject => {
+    const repeats = subjectRepeats(subject);
     const st = subjectStats(subject);
     const repeatNote = repeats > 1 ? ` (${subject.totalPages}p × ${repeats}회독)` : '';
-    const todayStr = fmt(todayUTC());
+    const todayStr = fmt(viewDate());
     const doneToday = Number((logs[subject.id] || {})[todayStr]) || 0;
     const achieved = st.remainingPages === 0 || (st.todayGoal > 0 && doneToday >= st.todayGoal);
 
@@ -1162,11 +1467,14 @@ function renderAllGoals(){
     if(st.remainingPages === 0){
       goalNum = '0'; goalRange = ''; goalLabel = `${subject.name} 완료`;
     } else if(st.todayGoal === 0){
-      goalNum = '0'; goalRange = ''; goalLabel = `${subject.name} · 오늘은 쉬어가는 날이에요`;
+      goalNum = '0'; goalRange = '';
+      goalLabel = st.isStudyToday
+        ? `${subject.name} · 오늘은 쉬어가는 날이에요`
+        : `${subject.name} · 오늘은 쉬는 요일이에요 (진행: ${studyDaysLabel(subject)})`;
     } else {
       goalNum = st.todayGoal;
       goalRange = todayGoalRangeText(subject, st);
-      goalLabel = `${subject.name} · 남은 ${st.remainingPages}페이지${repeatNote}`;
+      goalLabel = `${subject.name} · 남은 ${st.remainingPages}페이지${repeatNote} · 진행 요일 ${studyDaysLabel(subject)}`;
     }
     const status = statusMessage(st, subject.name);
     const currentRoundPos = st.doneToDate > 0 ? bookPosition(st.doneToDate, subject.totalPages) : null;
@@ -1180,7 +1488,7 @@ function renderAllGoals(){
     const todayAchievedPct = st.remainingPages === 0 ? 100 : (st.todayGoal > 0 ? Math.min(100, (doneToday / st.todayGoal) * 100) : 0);
     const todayAchievedPctDisplay = st.todayGoal > 0 ? Math.round((doneToday / st.todayGoal) * 100) : (st.remainingPages === 0 ? 100 : 0);
 
-    const todayStr2 = fmt(todayUTC());
+    const todayStr2 = fmt(viewDate());
     const todayEntryDelta = (logs[subject.id] || {})[todayStr2];
     const miniLogHtml = (todayEntryDelta !== undefined && todayEntryDelta > 0) ? (() => {
       const date = todayStr2;
@@ -1240,6 +1548,178 @@ function renderAllGoals(){
   }).join('');
 }
 
+// ---------- 공부 달력 (daily achievement calendar) ----------
+let calYear = null, calMonth = null; // calMonth is 0-indexed
+let calSelected = null;              // 'YYYY-MM-DD'
+
+// The goal a subject had on a given date, computed exactly like the live "오늘의 목표" card:
+// remaining pages (after everything logged BEFORE that date) spread over the study days left.
+// Returns null when the subject wasn't scheduled that day.
+function dayStatsFor(subject, date){
+  const start = toDate(plan.startDate), end = toDate(plan.endDate);
+  if(date < start || date > end || !isStudyDay(subject, date)) return null;
+  const dStr = fmt(date);
+  const target = subjectTarget(subject);
+  const prev = cumulativeBefore(subject.id, dStr);
+  const remainingBefore = Math.max(target - prev, 0);
+  const dayBefore = new Date(date); dayBefore.setUTCDate(dayBefore.getUTCDate() - 1);
+  const studyTotal = Math.max(countStudyDays(subject, start, end), 1);
+  const studyLeft = Math.max(studyTotal - countStudyDays(subject, start, dayBefore), 1);
+  const goal = remainingBefore > 0 ? Math.ceil(remainingBefore / studyLeft) : 0;
+  return { goal, prev };
+}
+
+// Earliest date with any logged pages (null if nothing was ever logged). Days before it are
+// shown as "기록 전" instead of "미달성", since nothing was being tracked yet.
+function firstLogDateStr(){
+  let min = null;
+  for(const s of plan.subjects){
+    for(const [d, p] of Object.entries(logs[s.id] || {})){
+      if((Number(p) || 0) > 0 && (min === null || d < min)) min = d;
+    }
+  }
+  return min;
+}
+
+function calendarDayInfo(date, firstLog){
+  if(firstLog === undefined) firstLog = firstLogDateStr();
+  const dStr = fmt(date);
+  const start = toDate(plan.startDate), end = toDate(plan.endDate);
+  const today = todayUTC();
+  const inPlan = date >= start && date <= end;
+  const rows = plan.subjects.map(s => {
+    const ds = inPlan ? dayStatsFor(s, date) : null;
+    const done = Number((logs[s.id] || {})[dStr]) || 0;
+    return { s, scheduled: !!ds, goal: ds ? ds.goal : 0, prev: ds ? ds.prev : cumulativeBefore(s.id, dStr), done };
+  });
+  const totalDone = rows.reduce((a, r) => a + r.done, 0);
+  const due = rows.filter(r => r.scheduled && r.goal > 0);
+  const isToday = date.getTime() === today.getTime();
+  let status;
+  if(!inPlan) status = 'out';
+  else if(date > today) status = 'future';
+  else if(!rows.some(r => r.scheduled)) status = 'rest';
+  else if(!isToday && (firstLog === null || dStr < firstLog)) status = 'pre'; // before tracking began
+  else if(due.length === 0) status = 'achieved'; // everything scheduled was already finished
+  else if(due.every(r => r.done >= r.goal)) status = 'achieved';
+  else if(isToday) status = 'today';             // today isn't over yet
+  else status = due.some(r => r.done > 0) ? 'partial' : 'missed';
+  return { dStr, rows, due, totalDone, status, isToday };
+}
+
+// Short label for a subject on the calendar: 사회보험법 -> 사회보험, 경영학원론 -> 경영학.
+function calShortName(name){
+  return String(name).replace(/원론$/, '').replace(/^(.{3,})법$/, '$1');
+}
+
+// One coloured line per subject: green = reached today's goal, amber = partly, red = missed,
+// grey = still to do / nothing tracked yet.
+function calChipHtml(r, info){
+  const tracked = ['achieved', 'partial', 'missed', 'today'].includes(info.status);
+  let cls, num = '';
+  if(!r.scheduled){ cls = 'bonus'; num = `+${r.done}p`; }               // studied on a day it wasn't scheduled
+  else if(!tracked){ cls = 'pending'; }                                  // future / before tracking began
+  else if(r.goal === 0){ cls = 'ok'; num = '완료'; }
+  else if(r.done >= r.goal){ cls = 'ok'; num = `${r.done}/${r.goal}`; }
+  else if(r.done > 0){ cls = 'part'; num = `${r.done}/${r.goal}`; }
+  else { cls = info.isToday ? 'pending' : 'miss'; num = `0/${r.goal}`; }
+  const name = r.s.name;
+  return `<div class="cal-chip cal-chip-${cls}" title="${name}"><span class="nm-full">${calShortName(name)}</span><span class="nm-short">${name.charAt(0)}</span><span class="cal-chip-n">${num}</span></div>`;
+}
+
+function renderCalendar(){
+  const grid = $('calendarGrid');
+  if(!grid || !plan) return;
+  const today = todayUTC();
+  if(calYear === null){ calYear = today.getUTCFullYear(); calMonth = today.getUTCMonth(); }
+  $('calTitle').textContent = `${calYear}년 ${calMonth + 1}월`;
+
+  const first = new Date(Date.UTC(calYear, calMonth, 1));
+  const daysInMonth = new Date(Date.UTC(calYear, calMonth + 1, 0)).getUTCDate();
+  const monthPrefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  if(calSelected && !calSelected.startsWith(monthPrefix)) calSelected = null;
+  if(!calSelected && fmt(today).startsWith(monthPrefix)) calSelected = fmt(today);
+
+  const ICONS = { achieved: '✓', partial: '△', missed: '✕', today: '●' };
+  const counts = { achieved: 0, partial: 0, missed: 0 };
+  const cells = [];
+  const firstLog = firstLogDateStr();
+  for(let i = 0; i < first.getUTCDay(); i++) cells.push('<div class="cal-cell cal-blank"></div>');
+
+  for(let day = 1; day <= daysInMonth; day++){
+    const date = new Date(Date.UTC(calYear, calMonth, day));
+    const info = calendarDayInfo(date, firstLog);
+    if(counts[info.status] !== undefined) counts[info.status]++;
+
+    const chips = info.rows.filter(r => r.scheduled || r.done > 0).map(r => calChipHtml(r, info)).join('');
+    const title = `${md(info.dStr)}` + info.rows
+      .filter(r => r.scheduled || r.done > 0)
+      .map(r => ` · ${r.s.name} ${r.done}p${r.goal ? '/' + r.goal + 'p' : ''}`).join('');
+
+    const cls = ['cal-cell', `cal-${info.status}`];
+    if(info.isToday) cls.push('cal-today');
+    if(calSelected === info.dStr) cls.push('cal-selected');
+    cells.push(`
+      <div class="${cls.join(' ')}" data-date="${info.dStr}" title="${title}">
+        <div class="cal-top"><span>${day}</span><span class="cal-icon">${ICONS[info.status] || ''}</span></div>
+        <div class="cal-chips">${chips}</div>
+      </div>`);
+  }
+  grid.innerHTML = cells.join('');
+
+  $('calMonthSummary').innerHTML = `
+    <span class="cal-badge" style="background:var(--progress-soft); color:var(--progress);">✓ 달성 ${counts.achieved}일</span>
+    <span class="cal-badge" style="background:var(--goal-soft); color:#8A5A00;">△ 일부 ${counts.partial}일</span>
+    <span class="cal-badge" style="background:var(--behind-soft); color:var(--behind);">✕ 미달성 ${counts.missed}일</span>`;
+
+  renderCalendarDetail();
+}
+
+function renderCalendarDetail(){
+  const box = $('calDayDetail');
+  if(!box) return;
+  if(!calSelected){ box.innerHTML = `<div style="color:var(--ink-soft);">날짜를 누르면 그날의 과목별 진도가 보여요.</div>`; return; }
+  const date = toDate(calSelected);
+  const info = calendarDayInfo(date);
+  const STATUS_TEXT = {
+    achieved: '<span class="cal-ok">✓ 목표 달성</span>', partial: '<span style="color:#B26A00; font-weight:600;">△ 일부 달성</span>',
+    missed: '<span class="cal-no">✕ 미달성</span>', today: '<b>● 오늘 진행 중</b>',
+    future: '<span style="color:var(--ink-soft);">예정</span>', rest: '<span style="color:var(--ink-soft);">쉬는 날</span>',
+    pre: '<span style="color:var(--ink-soft);">기록 시작 전</span>',
+    out: '<span style="color:var(--ink-soft);">공부 기간 밖</span>'
+  };
+  const lines = info.rows.filter(r => r.scheduled || r.done > 0).map(r => {
+    let reached = '';
+    if(r.done > 0){
+      const pos = bookPosition(r.prev + r.done, r.s.totalPages);
+      reached = ` · ${subjectRepeats(r.s) > 1 ? pos.round + '회독 ' : ''}${pos.page}p까지`;
+    }
+    const ok = r.goal === 0 ? '' : (r.done >= r.goal ? ' <span class="cal-ok">✓</span>' : (info.status === 'future' || info.status === 'today' ? '' : ' <span class="cal-no">✕</span>'));
+    const goalText = r.scheduled ? (r.goal > 0 ? `목표 ${r.goal}p` : '이미 완료') : '쉬는 요일';
+    return `<div class="cal-detail-row"><span>${r.s.name}</span><span>실적 <b>${r.done}p</b> / ${goalText}${reached}${ok}</span></div>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="cal-detail-box">
+      <div class="cal-detail-title">${date.getUTCMonth() + 1}월 ${date.getUTCDate()}일 (${KOREAN_WEEKDAYS[date.getUTCDay()]}) · ${STATUS_TEXT[info.status] || ''}</div>
+      ${lines || `<div style="color:var(--ink-soft);">이 날은 예정된 과목이 없어요.</div>`}
+    </div>`;
+}
+
+$('calendarGrid').addEventListener('click', (e) => {
+  const cell = e.target.closest('.cal-cell[data-date]');
+  if(!cell) return;
+  calSelected = cell.dataset.date;
+  renderCalendar();
+});
+function shiftCalendarMonth(delta){
+  const d = new Date(Date.UTC(calYear, calMonth + delta, 1));
+  calYear = d.getUTCFullYear(); calMonth = d.getUTCMonth(); calSelected = null;
+  renderCalendar();
+}
+$('calPrevBtn').onclick = () => shiftCalendarMonth(-1);
+$('calNextBtn').onclick = () => shiftCalendarMonth(1);
+$('calTodayBtn').onclick = () => { calYear = null; calMonth = null; calSelected = null; renderCalendar(); };
+
 // ---------- view switch (진도율 / 복습 체크리스트) ----------
 $('viewProgressBtn').onclick = () => {
   $('viewProgressBtn').classList.add('active');
@@ -1264,24 +1744,19 @@ const REVIEW_OFFSETS = [1, 4, 7, 14];
 // based on the original flat daily plan (target / totalDays) — independent of
 // whether the person actually studied that day or not.
 function plannedRangeForDate(subject, date){
-  const start = toDate(plan.startDate);
-  const end = toDate(plan.endDate);
-  if(date < start || date > end) return null; // outside the plan period
-  const totalDays = diffDays(start, end) + 1;
-  const dayIndex = diffDays(start, date); // 0-indexed day of the plan
-  const target = subjectTarget(subject);
-  const cumBefore = Math.round(target * dayIndex / totalDays);
-  const cumAfter = Math.round(target * (dayIndex + 1) / totalDays);
-  if(cumAfter <= cumBefore) return null; // rounds to zero planned pages that day
-  const startPos = bookPosition(cumBefore + 1, subject.totalPages);
-  const endPos = bookPosition(Math.min(cumAfter, target), subject.totalPages);
+  // 그날 '실제로 기록한' 분량만 복습 대상으로 삼아요 (계획이 아니라 실제 공부한 양).
+  const dStr = fmt(date);
+  const done = Number((logs[subject.id] || {})[dStr]) || 0;
+  if(done <= 0) return null;                       // 그날 기록이 없으면 복습할 것도 없음
+  const prev = cumulativeBefore(subject.id, dStr);  // 그날 이전까지 읽은 누적(기존 진행 포함)
+  const startPos = bookPosition(prev + 1, subject.totalPages);
+  const endPos = bookPosition(prev + done, subject.totalPages);
   return { startPos, endPos };
 }
 
 function renderReviewChecklist(){
-  const today = todayUTC();
+  const today = viewDate();
   const todayStr = fmt(today);
-  const repeats = plan.repeats || 1;
   $('reviewDateLabel').textContent = koreanDateLabel(today);
 
   $('reviewChecklist').innerHTML = REVIEW_OFFSETS.map(offset => {
@@ -1293,6 +1768,7 @@ function renderReviewChecklist(){
       .filter(x => x.range !== null);
 
     const itemsHtml = items.length ? items.map(({ s, range }) => {
+      const repeats = subjectRepeats(s);
       const roundTag = (r) => repeats > 1 ? `${r}회독 ` : '';
       let pageLabel;
       if(range.startPos.round === range.endPos.round){
@@ -1307,7 +1783,7 @@ function renderReviewChecklist(){
           <input type="checkbox" id="rc_${key}" data-key="${key}" ${checked ? 'checked' : ''}>
           <label for="rc_${key}">${s.name} — ${pageLabel}</label>
         </div>`;
-    }).join('') : `<div class="review-empty">그날은 진도 구간이 없어요.</div>`;
+    }).join('') : `<div class="review-empty">그날은 공부 기록이 없어요.</div>`;
 
     return `
       <div>
@@ -1329,8 +1805,14 @@ function renderReviewChecklist(){
 }
 
 function renderReviewFullGrid(){
+  renderReviewFullGridInner();
+  renderReviewCalendar();
+}
+function renderReviewFullGridInner(){
   const start = toDate(plan.startDate);
-  const today = todayUTC();
+  const realToday = todayUTC();
+  const sel = viewDate();
+  const today = sel > realToday ? sel : realToday;
   const totalDays = diffDays(start, today) + 1;
   if(totalDays <= 0){
     $('reviewFullGrid').innerHTML = '';
@@ -1362,7 +1844,7 @@ function renderReviewFullGrid(){
       return `<td><div class="rg-cell ${cls}" title="${dStr} · ${offset}일 전 (${checkedCount}/${applicable.length})"></div></td>`;
     }).join('');
 
-    const isToday = dStr === fmt(today);
+    const isToday = dStr === fmt(realToday);
     rows.push(`<tr class="${isToday ? 'review-row-today' : ''}"><td>${md(dStr)}${isToday ? ' (오늘)' : ''}</td>${cells}</tr>`);
   }
 
@@ -1381,9 +1863,139 @@ function renderReviewFullGrid(){
   }).join('');
 }
 
+
+// ---------- 복습 달력 (날짜별 복습 진도율) ----------
+let rcYear = null, rcMonth = null, rcSelected = null;
+
+// 어떤 날짜에 해야 할 복습(1·4·7·14일 전에 실제로 공부한 분량)과, 그중 체크한 개수
+function reviewDayInfo(date){
+  const dStr = fmt(date);
+  const realToday = todayUTC();
+  let total = 0, checked = 0;
+  const groups = REVIEW_OFFSETS.map(offset => {
+    const src = new Date(date); src.setUTCDate(src.getUTCDate() - offset);
+    const items = plan.subjects
+      .map(s => ({ s, range: plannedRangeForDate(s, src) }))
+      .filter(x => x.range !== null)
+      .map(x => ({ ...x, done: !!reviewChecks[`${dStr}_${offset}_${x.s.id}`] }));
+    total += items.length;
+    checked += items.filter(i => i.done).length;
+    return { offset, src, items };
+  });
+  const isToday = date.getTime() === realToday.getTime();
+  let status;
+  if(total === 0) status = 'rest';
+  else if(date > realToday) status = 'future';
+  else if(checked === total) status = 'achieved';
+  else if(isToday) status = 'today';
+  else status = checked > 0 ? 'partial' : 'missed';
+  return { dStr, total, checked, groups, status, isToday };
+}
+
+function renderReviewCalendar(){
+  const grid = $('rcGrid');
+  if(!grid || !plan) return;
+  const realToday = todayUTC();
+  if(rcYear === null){ const base = viewDate(); rcYear = base.getUTCFullYear(); rcMonth = base.getUTCMonth(); }
+  $('rcTitle').textContent = `${rcYear}년 ${rcMonth + 1}월`;
+  const first = new Date(Date.UTC(rcYear, rcMonth, 1));
+  const daysInMonth = new Date(Date.UTC(rcYear, rcMonth + 1, 0)).getUTCDate();
+  const monthPrefix = `${rcYear}-${String(rcMonth + 1).padStart(2, '0')}`;
+  if(rcSelected && !rcSelected.startsWith(monthPrefix)) rcSelected = null;
+  if(!rcSelected && fmt(realToday).startsWith(monthPrefix)) rcSelected = fmt(realToday);
+
+  const ICONS = { achieved: '✓', partial: '△', missed: '✕', today: '●' };
+  const CLS = { achieved: 'cal-achieved', partial: 'cal-partial', missed: 'cal-missed', today: 'cal-today', rest: 'cal-rest', future: 'cal-future' };
+  let mTotal = 0, mChecked = 0, nFull = 0, nPartial = 0, nMissed = 0;
+  const cells = [];
+  for(let i = 0; i < first.getUTCDay(); i++) cells.push('<div class="cal-cell cal-blank"></div>');
+  for(let day = 1; day <= daysInMonth; day++){
+    const date = new Date(Date.UTC(rcYear, rcMonth, day));
+    const info = reviewDayInfo(date);
+    if(date <= realToday && info.status !== 'rest'){
+      mTotal += info.total; mChecked += info.checked;
+      if(info.status === 'achieved') nFull++;
+      else if(info.status === 'partial') nPartial++;
+      else if(info.status === 'missed') nMissed++;
+    }
+    const pct = info.total ? Math.round(info.checked / info.total * 100) : 0;
+    const cls = ['cal-cell', CLS[info.status]];
+    if(info.isToday && info.status !== 'today') cls.push('cal-today');
+    if(rcSelected === info.dStr) cls.push('cal-selected');
+    const body = info.total ? `
+        <div>
+          <div class="rc-count">${info.checked}/${info.total}</div>
+          <div class="rc-bar"><i style="width:${pct}%"></i></div>
+          <div class="rc-pct">${pct}%</div>
+        </div>` : '<div></div>';
+    cells.push(`
+      <div class="${cls.join(' ')}" data-date="${info.dStr}" title="${md(info.dStr)} · 복습 ${info.checked}/${info.total}">
+        <div class="cal-top"><span>${day}</span><span class="cal-icon">${ICONS[info.status] || ''}</span></div>
+        ${body}
+      </div>`);
+  }
+  grid.innerHTML = cells.join('');
+  const mPct = mTotal ? Math.round(mChecked / mTotal * 100) : 0;
+  $('rcSummary').innerHTML = `
+    <span class="cal-badge" style="background:var(--progress-soft); color:var(--progress);">이번 달 복습 달성률 ${mPct}% (${mChecked}/${mTotal})</span>
+    <span class="cal-badge" style="background:var(--progress-soft); color:var(--progress);">✓ 전부 ${nFull}일</span>
+    <span class="cal-badge" style="background:var(--goal-soft); color:#8A5A00;">△ 일부 ${nPartial}일</span>
+    <span class="cal-badge" style="background:var(--behind-soft); color:var(--behind);">✕ 못 함 ${nMissed}일</span>`;
+  renderReviewCalendarDetail();
+}
+
+function renderReviewCalendarDetail(){
+  const box = $('rcDetail');
+  if(!box) return;
+  if(!rcSelected){ box.innerHTML = `<div style="color:var(--ink-soft);">날짜를 누르면 그날 해야 할 복습이 보여요.</div>`; return; }
+  const date = toDate(rcSelected);
+  const info = reviewDayInfo(date);
+  const repeats = (s) => subjectRepeats(s);
+  const STATUS_TEXT = {
+    achieved: '<span class="cal-ok">✓ 복습 전부 완료</span>', partial: '<span style="color:#B26A00; font-weight:600;">△ 일부 완료</span>',
+    missed: '<span class="cal-no">✕ 못 함</span>', today: '<b>● 오늘 진행 중</b>',
+    future: '<span style="color:var(--ink-soft);">예정</span>', rest: '<span style="color:var(--ink-soft);">복습할 것 없음</span>'
+  };
+  const rows = info.groups.filter(g => g.items.length).map(g => g.items.map(({ s, range, done }) => {
+    const rt = (r) => repeats(s) > 1 ? `${r}회독 ` : '';
+    const label = range.startPos.round === range.endPos.round
+      ? `${rt(range.startPos.round)}${range.startPos.page}p ~ ${range.endPos.page}p`
+      : `${rt(range.startPos.round)}${range.startPos.page}p ~ ${s.totalPages}p 이어서 ${rt(range.endPos.round)}1p ~ ${range.endPos.page}p`;
+    const mark = done ? ' <span class="cal-ok">✓</span>' : (info.status === 'future' ? '' : ' <span class="cal-no">✕</span>');
+    return `<div class="cal-detail-row"><span>${g.offset}일 전 (${md(fmt(g.src))}) · ${s.name}</span><span>${label}${mark}</span></div>`;
+  }).join('')).join('');
+  box.innerHTML = `
+    <div class="cal-detail-box">
+      <div class="cal-detail-title">${date.getUTCMonth() + 1}월 ${date.getUTCDate()}일 (${KOREAN_WEEKDAYS[date.getUTCDay()]}) · ${STATUS_TEXT[info.status] || ''}${info.total ? ` · ${info.checked}/${info.total}` : ''}</div>
+      ${rows || `<div style="color:var(--ink-soft);">이 날은 복습할 내용이 없어요.</div>`}
+      ${info.total ? `<button type="button" class="link-btn" id="rcGoDateBtn" data-date="${info.dStr}" style="margin-top:8px;">이 날짜로 이동해서 체크하기</button>` : ''}
+    </div>`;
+}
+
+$('rcGrid').addEventListener('click', (e) => {
+  const cell = e.target.closest('.cal-cell[data-date]');
+  if(!cell) return;
+  rcSelected = cell.dataset.date;
+  renderReviewCalendar();
+});
+$('rcDetail').addEventListener('click', (e) => {
+  const btn = e.target.closest('#rcGoDateBtn');
+  if(!btn) return;
+  applyDate(btn.dataset.date);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+function shiftReviewCalendarMonth(delta){
+  const d = new Date(Date.UTC(rcYear, rcMonth + delta, 1));
+  rcYear = d.getUTCFullYear(); rcMonth = d.getUTCMonth(); rcSelected = null;
+  renderReviewCalendar();
+}
+$('rcPrevBtn').onclick = () => shiftReviewCalendarMonth(-1);
+$('rcNextBtn').onclick = () => shiftReviewCalendarMonth(1);
+$('rcTodayBtn').onclick = () => { rcYear = null; rcMonth = null; rcSelected = null; renderReviewCalendar(); };
+
 function renderSubjectProgressList(){
-  const repeats = plan.repeats || 1;
   $('subjectProgressList').innerHTML = plan.subjects.map(s => {
+    const repeats = subjectRepeats(s);
     const st = subjectStats(s);
     const repeatNote = repeats > 1 ? ` (${s.totalPages}p × ${repeats}회독)` : '';
     const diff = st.pct - st.idealPct;
@@ -1420,8 +2032,7 @@ function renderSubjectProgressList(){
 const SUBJECT_COLORS = ['#2F6F4F', '#D98E3B', '#3B6FA0', '#B0568C', '#5C8A3A', '#A0522D', '#4A7A8C', '#8A5FA0'];
 
 function renderTodayProgressList(){
-  const todayStr = fmt(todayUTC());
-  const repeats = plan.repeats || 1;
+  const todayStr = fmt(viewDate());
   $('todayProgressList').innerHTML = plan.subjects.map((s, i) => {
     const st = subjectStats(s);
     const doneToday = Number((logs[s.id] || {})[todayStr]) || 0;
@@ -1455,18 +2066,39 @@ function renderTodayProgressList(){
   }).join('');
 }
 
+let roundJumpArmedKey = null, roundJumpArmTimer = null;
 async function saveReachedPage(subjectId, reachedPage){
-  const date = $('logDate').value;
+  const date = fmt(viewDate());
   const subject = plan.subjects.find(s => s.id === subjectId);
   if(!subject) return;
-  if(!date){ alert('날짜를 선택하세요.'); return; }
+  if(!date){ alert('날짜를 선택하세요.'); return false; }
   if(isNaN(reachedPage) || reachedPage < 1 || reachedPage > subject.totalPages){
     alert(`1 ~ ${subject.totalPages} 사이의 페이지 번호를 입력하세요.`);
-    return;
+    return false;
   }
   const prevCumulative = cumulativeBefore(subjectId, date);
   const newCumulative = reachedPageToCumulative(reachedPage, subject.totalPages, prevCumulative);
   const delta = Math.max(0, newCumulative - prevCumulative);
+
+  // 안전장치 1: 목표 회독을 넘어가는 기록은 막기 (오타로 '완료' 처리되는 걸 방지)
+  if(newCumulative > subjectTarget(subject)){
+    alert(`목표 회독(${subjectRepeats(subject)}회독)을 넘어가는 기록이에요. 페이지를 다시 확인해 주세요.`);
+    return false;
+  }
+  // 안전장치 2: 직전 기록보다 작은 페이지는 '다음 회독으로 넘어감'으로 계산되므로 한 번 더 확인
+  const prevPageInRound = prevCumulative > 0 ? ((prevCumulative - 1) % subject.totalPages) + 1 : 0;
+  if(reachedPage < prevPageInRound && prevPageInRound < subject.totalPages){
+    const armKey = `${subjectId}_${date}_${reachedPage}`;
+    if(roundJumpArmedKey !== armKey){
+      roundJumpArmedKey = armKey;
+      clearTimeout(roundJumpArmTimer);
+      roundJumpArmTimer = setTimeout(() => { roundJumpArmedKey = null; }, 8000);
+      const nextRound = Math.floor((prevCumulative - 1) / subject.totalPages) + 2;
+      alert(`직전 기록(${prevPageInRound}p)보다 작은 페이지예요. ${nextRound}회독으로 넘어간 게 맞다면 같은 값으로 한 번 더 눌러주세요.`);
+      return false;
+    }
+  }
+  roundJumpArmedKey = null;
 
   if(!logs[subjectId]) logs[subjectId] = {};
   logs[subjectId][date] = delta;
@@ -1485,8 +2117,8 @@ $('allGoalsList').addEventListener('click', async (e) => {
     const subjectId = saveBtn.dataset.subjectId;
     const input = document.querySelector(`.reach-input[data-subject-id="${subjectId}"]`);
     const reachedPage = parseInt(input.value, 10);
-    await saveReachedPage(subjectId, reachedPage);
-    if(input) input.value = '';
+    const ok = await saveReachedPage(subjectId, reachedPage);
+    if(input && ok !== false) input.value = '';
     return;
   }
   const delBtn = e.target.closest('.mini-log-delete');
@@ -1508,8 +2140,7 @@ $('allGoalsList').addEventListener('click', async (e) => {
     const subjectId = editBtn.dataset.subjectId;
     const date = editBtn.dataset.date;
     const page = editBtn.dataset.page;
-    $('logDate').value = date;
-    updateLogDateWeekday();
+    applyDate(date);
     const input = document.querySelector(`.reach-input[data-subject-id="${subjectId}"]`);
     if(input){
       input.value = page;
@@ -1530,19 +2161,35 @@ $('allGoalsList').addEventListener('keydown', async (e) => {
     e.preventDefault();
     const subjectId = e.target.dataset.subjectId;
     const reachedPage = parseInt(e.target.value, 10);
-    await saveReachedPage(subjectId, reachedPage);
-    e.target.value = '';
+    const ok = await saveReachedPage(subjectId, reachedPage);
+    if(ok !== false) e.target.value = '';
   }
 });
+
+function syncPeriodInputs(){
+  if(!plan) return;
+  $('startDateTop').value = plan.startDate;
+  $('endDateTop').value = plan.endDate;
+}
+$('applyPeriodBtn').onclick = async () => {
+  const newStart = $('startDateTop').value;
+  const newEnd = $('endDateTop').value;
+  if(!newStart || !newEnd){ alert('시작일과 종료일을 입력하세요.'); return; }
+  if(toDate(newEnd) < toDate(newStart)){ alert('종료일은 시작일보다 빠를 수 없어요.'); return; }
+  plan.startDate = newStart;
+  plan.endDate = newEnd;
+  await savePlan();
+  refreshAll();
+};
 
 function showDashboard(){
   $('dashboardView').classList.remove('hidden');
   renderMotivationQuote();
-  $('logDate').value = fmt(todayUTC());
+  appliedDateStr = fmt(todayUTC());
+  $('logDate').value = appliedDateStr;
   updateLogDateWeekday();
-  $('repeatCountLive').value = plan.repeats || 1;
-  $('startDateLive').value = plan.startDate;
-  $('endDateLive').value = plan.endDate;
+  syncReviewDateInput();
+  syncPeriodInputs();
   renderTopBar();
   renderSummaryStats();
   renderSubjectEditList();
@@ -1554,6 +2201,7 @@ function showDashboard(){
 }
 
 function refreshAll(){
+  syncPeriodInputs();
   renderTopBar();
   renderSummaryStats();
   renderSubjectEditList();
@@ -1564,24 +2212,6 @@ function refreshAll(){
   renderReviewFullGrid();
 }
 
-$('recalcBtn').onclick = async () => {
-  const newStart = $('startDateLive').value;
-  const newEnd = $('endDateLive').value;
-  let repeats = parseInt($('repeatCountLive').value, 10);
-  if(!repeats || repeats < 1) repeats = 1;
-
-  if(!newStart || !newEnd){ alert('시작일과 종료일을 입력하세요.'); return; }
-  if(toDate(newEnd) < toDate(newStart)){ alert('종료일은 시작일보다 빠를 수 없어요.'); return; }
-
-  plan.repeats = repeats;
-  plan.startDate = newStart;
-  plan.endDate = newEnd;
-
-  $('repeatCountLive').value = repeats;
-  await savePlan();
-  refreshAll();
-};
-
 $('applySubjectEditsBtn').onclick = async () => {
   let hadInvalid = false;
 
@@ -1589,7 +2219,7 @@ $('applySubjectEditsBtn').onclick = async () => {
   for(const s of plan.subjects){
     const nameInput = document.querySelector(`.ser-name-input[data-subject-id="${s.id}"]`);
     if(!nameInput) continue;
-    const newName = nameInput.value.trim();
+    const newName = cleanName(nameInput.value);
     if(!newName){ nameInput.value = s.name; continue; }
     if(newName !== s.name && plan.subjects.some(other => other.id !== s.id && other.name === newName)){
       hadInvalid = true;
@@ -1603,18 +2233,23 @@ $('applySubjectEditsBtn').onclick = async () => {
   // (that would make progress read over 100% and make round math wrong for past entries).
   for(const s of plan.subjects){
     const pagesInput = document.querySelector(`.ser-pages[data-subject-id="${s.id}"]`);
+    const repeatsInput = document.querySelector(`.ser-repeats[data-subject-id="${s.id}"]`);
     if(!pagesInput) continue;
-    const pages = parseInt(pagesInput.value, 10);
-    if(!pages || pages < 1){ pagesInput.value = s.totalPages; continue; }
-    if(pages !== s.totalPages){
+    let pages = parseInt(pagesInput.value, 10);
+    let reps = repeatsInput ? parseInt(repeatsInput.value, 10) : subjectRepeats(s);
+    if(!pages || pages < 1){ pagesInput.value = s.totalPages; pages = s.totalPages; }
+    if(!reps || reps < 1){ if(repeatsInput) repeatsInput.value = subjectRepeats(s); reps = subjectRepeats(s); }
+    if(pages !== s.totalPages || reps !== subjectRepeats(s)){
       const currentDone = subjectStats(s).doneToDate;
-      if(pages * (plan.repeats || 1) < currentDone){
+      if(pages * reps < currentDone){
         hadInvalid = true;
         pagesInput.value = s.totalPages;
+        if(repeatsInput) repeatsInput.value = subjectRepeats(s);
         continue;
       }
     }
     s.totalPages = pages;
+    s.repeats = reps;
   }
 
   // 3) apply "기존 진행 페이지" as a flat baseline on the subject — NOT a dated log entry.
@@ -1623,19 +2258,41 @@ $('applySubjectEditsBtn').onclick = async () => {
   for(const s of plan.subjects){
     const existingInput = document.querySelector(`.ser-existing[data-subject-id="${s.id}"]`);
     if(!existingInput) continue;
+    const roundInput = document.querySelector(`.ser-existing-round[data-subject-id="${s.id}"]`);
     const raw = existingInput.value;
-    if(raw === ''){ s.baseline = 0; continue; }
+    const rawRound = roundInput ? roundInput.value : '';
+    if(raw === '' && (rawRound === '' || parseInt(rawRound, 10) <= 1)){ s.baseline = 0; continue; }
 
-    const existingPage = parseInt(raw, 10);
-    if(isNaN(existingPage) || existingPage < 0 || existingPage > s.totalPages){
+    const existingPage = raw === '' ? 0 : parseInt(raw, 10);
+    const existingRound = rawRound === '' ? 1 : parseInt(rawRound, 10);
+    if(isNaN(existingPage) || existingPage < 0 || existingPage > s.totalPages ||
+       isNaN(existingRound) || existingRound < 1 || existingRound > subjectRepeats(s) ||
+       (existingRound - 1) * s.totalPages + existingPage > subjectTarget(s)){
       hadInvalid = true;
       continue;
     }
-    s.baseline = existingPage;
+    s.baseline = (existingRound - 1) * s.totalPages + existingPage;
+  }
+
+  // 4) apply study weekdays (at least one day must stay selected)
+  for(const s of plan.subjects){
+    const mainRow = document.querySelector(`.ser-days-main[data-subject-id="${s.id}"]`);
+    if(!mainRow) continue;
+    const chips = mainRow.querySelectorAll('.ser-day.on');
+    if(!chips.length){ hadInvalid = true; continue; }
+    s.studyDays = [...chips].map(c => parseInt(c.dataset.day, 10)).sort((a, b) => a - b);
+    const altRow = document.querySelector(`.ser-days-alt[data-subject-id="${s.id}"]`);
+    if(altRow && !altRow.classList.contains('hidden')){
+      const altChips = altRow.querySelectorAll('.ser-day.on');
+      if(!altChips.length){ hadInvalid = true; }
+      else s.studyDaysAlt = [...altChips].map(c => parseInt(c.dataset.day, 10)).sort((a, b) => a - b);
+    } else {
+      s.studyDaysAlt = null;
+    }
   }
   await savePlan();
 
-  showToast(hadInvalid ? '일부 값은 반영되지 않았어요 (이미 읽은 페이지보다 적거나, 이름이 중복돼요).' : '과목별 설정을 모두 적용했어요.');
+  showToast(hadInvalid ? '일부 값은 반영되지 않았어요 (이미 읽은 분량보다 적거나, 현재 회독·페이지가 범위를 벗어나거나, 이름이 중복되거나, 공부 요일이 하나도 선택되지 않았어요).' : '과목별 설정을 모두 적용했어요.');
   renderSubjectEditList();
   renderSubjectProgressList();
   renderTodayProgressList();
@@ -1652,10 +2309,10 @@ function defaultPlan(){
     endDate: '2027-04-30',
     repeats: 5,
     subjects: [
-      { id: 's_labor366', name: '노동법', totalPages: 366 },
-      { id: 's_civil585', name: '민법', totalPages: 585 },
-      { id: 's_social470', name: '사회보험법', totalPages: 470 },
-      { id: 's_biz657', name: '경영학원론', totalPages: 657 }
+      { id: 's_labor366', name: '노동법', totalPages: 366, repeats: 5 },
+      { id: 's_civil585', name: '민법', totalPages: 585, repeats: 5 },
+      { id: 's_social470', name: '사회보험법', totalPages: 470, repeats: 5 },
+      { id: 's_biz657', name: '경영학원론', totalPages: 657, repeats: 5 }
     ]
   };
 }
@@ -1666,9 +2323,13 @@ function defaultPlan(){
   if(!plan || !plan.subjects || !plan.subjects.length){
     plan = defaultPlan();
     plan.subjects.forEach(s => { if(!logs[s.id]) logs[s.id] = {}; });
-    await savePlan();
-    await saveLogs();
   }
+  // Older saved data has no studyDays: fill them in (월~금, 경영학 월수금, 사회보험 화목)
+  // without touching any logged progress, then persist.
+  ensureStudyDays();
+  ensureRepeats();
+  await savePlan();
+  await saveLogs();
   activeSubjectId = plan.subjects[0].id;
   showDashboard();
 })();
