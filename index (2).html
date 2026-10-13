@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>효정 노무사 공부 진도율</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --paper: #EFF3F0;
+    --paper-line: rgba(27,43,41,0.07);
+    --card: #FFFFFF;
+    --ink: #1B2B29;
+    --ink-soft: #5B6C69;
+    --line: #D8E0DC;
+    --progress: #2F6F4F;
+    --progress-soft: #DCEBE3;
+    --goal: #D98E3B;
+    --goal-soft: #F6E7D2;
+    --behind: #C4573B;
+    --behind-soft: #F5DED7;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px),
+      var(--paper);
+    background-size: 28px 28px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans KR', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px;}
+  h1,h2,h3{font-family:'Source Serif 4', serif; margin:0; letter-spacing:-0.01em;}
+  .app-title{font-size:26px; font-weight:600;}
+  .app-sub{color:var(--ink-soft); font-size:14px; margin-top:4px;}
+  .motivation-quote{
+    font-family:'IBM Plex Sans KR', sans-serif; font-weight:500; font-size:15px; color:#8A6D00;
+    padding:12px 16px; margin-bottom:22px; border-left:3px solid var(--goal); background:var(--goal-soft);
+    border-radius:0 8px 8px 0; line-height:1.5;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+  .stack{display:flex; flex-direction:column; gap:16px;}
+  .review-hero-card{background:#FFFBEB; border-color:#FFE082;}
+  .row{display:flex; gap:12px; flex-wrap:wrap;}
+  .row > *{flex:1; min-width:140px;}
+
+  label{font-size:13px; color:var(--ink-soft); display:block; margin-bottom:6px;}
+  input[type=date], input[type=text], input[type=number], select{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px;
+    font-size:15px; font-family:'IBM Plex Sans KR', sans-serif; background:#FBFCFB; color:var(--ink);
+  }
+  input:focus, select:focus{outline:2px solid var(--progress); outline-offset:1px;}
+
+  button{
+    font-family:'IBM Plex Sans KR', sans-serif; font-weight:600; font-size:14px;
+    border:none; border-radius:8px; padding:11px 18px; cursor:pointer;
+    background:var(--progress); color:#fff;
+  }
+  button:hover{filter:brightness(1.06);}
+  button.ghost{background:transparent; color:var(--progress); border:1px solid var(--progress);}
+  button.subtle{background:transparent; color:var(--ink-soft); border:1px solid var(--line); font-weight:500;}
+  button.danger-text{background:none; color:var(--behind); font-weight:500; padding:4px 8px;}
+
+  .subject-row{display:flex; gap:10px; align-items:end;}
+  .subject-row .name{flex:2;} .subject-row .pages{flex:1;}
+  .subject-row button{padding:10px 12px;}
+
+  .top-bar{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:26px; flex-wrap:wrap;}
+  .dday{
+    font-family:'IBM Plex Mono', monospace; font-size:15px; background:var(--card);
+    border:1px solid var(--line); border-radius:20px; padding:7px 14px; white-space:nowrap;
+    transition:background .3s ease, color .3s ease, border-color .3s ease;
+  }
+  .dday.dday-soon{background:#FFF3E0; border-color:#FFB74D; color:#B26A00; font-weight:700;}
+  .dday.dday-urgent{background:#FDECEA; border-color:#E0483C; color:#C13A2E; font-weight:700;}
+  .dday.dday-critical{
+    background:#E0483C; border-color:#E0483C; color:#fff; font-weight:800;
+    animation:dday-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes dday-pulse{
+    0%, 100%{ box-shadow:0 0 0 0 rgba(224,72,60,0.5); }
+    50%{ box-shadow:0 0 0 6px rgba(224,72,60,0); }
+  }
+
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;}
+  .tabs-nav{display:flex; align-items:center; gap:8px; margin-bottom:18px;}
+  .tabs-nav .tabs{margin-bottom:0; flex:1;}
+  .tab-arrow{
+    flex:0 0 auto; width:34px; height:34px; padding:0; border-radius:50%;
+    background:var(--card); color:var(--ink); border:1px solid var(--line);
+    font-size:17px; line-height:1; display:flex; align-items:center; justify-content:center;
+  }
+  .tab-arrow:disabled{opacity:0.35; cursor:default;}
+  .add-subject-inline{display:flex; gap:8px; margin-bottom:18px; margin-top:-10px;}
+  .add-subject-inline input{flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:'IBM Plex Sans KR', sans-serif; background:#FBFCFB;}
+  .add-subject-inline button{padding:9px 16px; font-size:13px;}
+  .subject-pages-edit{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .subject-pages-edit label{margin-bottom:0; font-size:13px; color:var(--ink-soft); white-space:nowrap;}
+  .subject-pages-edit input{width:110px;}
+
+  .subject-edit-block{display:flex; flex-direction:column; gap:5px; padding:8px 10px; border-radius:10px; background:#FAFBFA; border:1px solid var(--line);}
+  .ser-line{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .ser-name-input{flex:1 1 90px; min-width:80px; font-weight:600; font-size:14px; padding:5px 8px;}
+  .ser-f{display:flex; align-items:center; gap:4px; margin:0; font-size:12px; color:var(--ink-soft); white-space:nowrap;}
+  .ser-f input{width:58px; padding:5px 6px; font-size:13px;}
+  .ser-f input.ser-narrow{width:42px;}
+  .ser-line .ser-delete{flex:0 0 auto; white-space:nowrap; font-size:12px; padding:2px 6px;}
+  .ser-days-line{display:flex; align-items:center; justify-content:flex-start; gap:6px 14px; flex-wrap:wrap;}
+  .ser-days{display:flex; align-items:center; gap:2px; flex-wrap:nowrap;}
+  .ser-days-label{font-size:11px; color:var(--ink-soft); margin-right:2px; white-space:nowrap;}
+  .ser-day{padding:2px 7px; font-size:11px; line-height:1.4; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer;}
+  .ser-day.on{background:#2F6F4F; border-color:#2F6F4F; color:#fff; font-weight:600;}
+  .ser-alt-toggle{margin-left:6px; padding:2px 9px; font-size:11px; line-height:1.4; border-radius:12px; border:1px dashed var(--line); background:transparent; color:var(--ink-soft); font-weight:500; cursor:pointer;}
+  .ser-alt-toggle.on{border:1px solid #D98E3B; background:#F6E7D2; color:#8A5A00; font-weight:600;}
+  #subjectEditList{display:flex; flex-direction:column; gap:8px;}
+
+  /* ---- 공부 달력 ---- */
+  .cal-head{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .cal-title{flex:1; text-align:center; font-weight:600; font-size:16px;}
+  .cal-today-btn{padding:7px 12px; font-size:12px;}
+  .cal-summary{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; font-size:12px;}
+  .cal-badge{padding:3px 10px; border-radius:12px; font-weight:600;}
+  .cal-legend{display:flex; gap:6px 14px; flex-wrap:wrap; font-size:12px; color:var(--ink-soft); margin-bottom:12px;}
+  .cal-legend i{display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+  .cal-weekdays, .cal-grid{display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px;}
+  .cal-weekdays span{text-align:center; font-size:12px; color:var(--ink-soft); padding:4px 0;}
+  .cal-cell{
+    min-height:104px; border:1px solid var(--line); border-radius:8px; padding:4px 5px; background:#FBFCFB;
+    display:flex; flex-direction:column; justify-content:space-between; gap:2px; cursor:pointer; overflow:hidden;
+  }
+  .cal-cell.cal-blank{border:none; background:none; cursor:default;}
+  .cal-top{display:flex; justify-content:space-between; align-items:baseline; font-size:12px; font-weight:600;}
+  .cal-icon{font-size:12px; font-weight:700;}
+  .cal-chips{display:flex; flex-direction:column; gap:2px; margin-top:2px;}
+  .cal-chip{display:flex; justify-content:space-between; align-items:center; gap:4px; border-radius:5px; padding:1px 5px; font-size:10.5px; line-height:1.4; font-weight:600; white-space:nowrap; overflow:hidden;}
+  .cal-chip .nm-short{display:none;}
+  .cal-chip-n{font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:10px;}
+  .cal-chip-ok{background:#2F6F4F; color:#fff;}
+  .cal-chip-part{background:#F0B866; color:#5A3A00;}
+  .cal-chip-miss{background:#E7A090; color:#6B1F10;}
+  .cal-chip-pending{background:#E9EEEB; color:var(--ink-soft);}
+  .cal-chip-bonus{background:#DCEBE3; color:var(--progress);}
+  .cal-achieved{background:#C9E6D5; border-color:#2F6F4F; box-shadow:inset 0 0 0 1px #2F6F4F;}
+  .cal-achieved .cal-icon{color:var(--progress); font-size:14px;}
+  .cal-achieved .cal-top > span:first-child{color:var(--progress);}
+  .cal-partial{background:var(--goal-soft); border-color:#E8C48F;}
+  .cal-partial .cal-icon{color:#B26A00;}
+  .cal-missed{background:var(--behind-soft); border-color:#E3A99A;}
+  .cal-missed .cal-icon{color:var(--behind);}
+  .cal-rest, .cal-out, .cal-pre{background:#F3F5F4; color:var(--ink-soft);}
+  .cal-future{background:#fff;}
+  .cal-today{outline:2px solid var(--ink); outline-offset:-1px; background:#fff;}
+  .cal-selected{box-shadow:0 0 0 2px #3B6FA0;}
+  .cal-achieved.cal-selected{box-shadow:inset 0 0 0 1px #2F6F4F, 0 0 0 2px #3B6FA0;}
+  .rc-count{font-family:'IBM Plex Mono', monospace; font-size:11px; font-weight:700; text-align:center;}
+  .rc-bar{height:6px; background:rgba(27,43,41,0.12); border-radius:3px; overflow:hidden; margin-top:3px;}
+  .rc-bar > i{display:block; height:100%; background:#2F6F4F; border-radius:3px;}
+  .rc-pct{font-size:10px; text-align:center; color:var(--ink-soft); margin-top:2px;}
+  .cal-detail{margin-top:14px; font-size:13px; line-height:1.7;}
+  .cal-detail-box{border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:#FBFCFB;}
+  .cal-detail-title{font-weight:600; margin-bottom:6px;}
+  .cal-detail-row{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .cal-ok{color:var(--progress); font-weight:600;}
+  .cal-no{color:var(--behind); font-weight:600;}
+  @media (max-width:520px){
+    .cal-cell{min-height:82px; padding:3px;}
+    .cal-chip{justify-content:center; padding:1px 2px;}
+    .cal-chip .nm-full, .cal-chip-n{display:none;}
+    .cal-chip .nm-short{display:inline;}
+    .cal-weekdays, .cal-grid{gap:3px;}
+  }
+  .tab{
+    padding:8px 16px; border-radius:20px; border:1px solid var(--line); background:var(--card);
+    font-size:14px; font-weight:500; cursor:pointer; color:var(--ink-soft);
+  }
+  .tab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  .hero{display:grid; grid-template-columns: 1.1fr 1fr; gap:18px;}
+  @media (max-width:680px){ .hero{grid-template-columns:1fr;} }
+
+  .goal-header{display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between;}
+  .goal-header-text{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;}
+  .goal-pct-ring{
+    flex:0 0 auto; width:56px; height:56px; border-radius:50%;
+    background:conic-gradient(#E0483C calc(var(--pct) * 1%), #FBE2DE 0);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .goal-pct-ring span{
+    width:44px; height:44px; border-radius:50%; background:var(--card);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:700; color:#E0483C;
+  }
+  .goal-num{font-size:52px; font-weight:600; line-height:1; color:var(--goal);}
+  .goal-label{font-size:14px; color:var(--ink-soft); margin-top:10px;}
+  .goal-range{font-family:'IBM Plex Sans KR', sans-serif; font-size:28px; color:var(--goal); font-weight:700; line-height:1;}
+  .carry-note{font-size:12px; color:var(--ink-soft); margin-top:12px; line-height:1.5;}
+  .status-line{margin-top:14px; font-size:15px; padding:10px 14px; border-radius:10px; line-height:1.5;}
+  .status-subtext{font-size:12px; opacity:0.85;}
+  .status-ahead{background:var(--progress-soft); color:var(--progress);}
+  .status-behind{background:var(--behind-soft); color:var(--behind);}
+  .status-ontrack{background:#EEF2F5; color:var(--ink-soft);}
+
+  .ruler{margin-top:18px;}
+  .ruler-track{position:relative; height:34px; background:#F1F3F1; border-radius:8px; overflow:hidden; border:1px solid var(--line);}
+  .ruler-fill{position:absolute; top:0; left:0; bottom:0; background:var(--progress); border-radius:8px 0 0 8px; transition:width .4s ease;}
+  .ruler-ideal-mark{position:absolute; top:0; bottom:0; width:2px; background:var(--goal);}
+  .ruler-ticks{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-soft); margin-top:4px; font-family:'IBM Plex Mono', monospace;}
+  .ruler-round-labels{position:relative; height:14px; margin-top:4px;}
+  .ruler-round-labels span{position:absolute; transform:translateX(-50%); font-size:10px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; white-space:nowrap;}
+  .ruler-legend{display:flex; gap:16px; font-size:12px; color:var(--ink-soft); margin-top:8px;}
+  .subject-progress-block{padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .subject-progress-block:last-child{padding-bottom:0; border-bottom:none;}
+  .spb-name{font-weight:600; font-size:15px; margin-bottom:6px;}
+  .spb-name-row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px; flex-wrap:wrap;}
+  .spb-name-row .spb-name{margin-bottom:0;}
+  .spb-current-page{
+    font-family:'IBM Plex Sans KR', sans-serif; font-size:22px; font-weight:700; color:var(--goal);
+    display:inline-flex; align-items:baseline; gap:6px; flex-wrap:wrap;
+  }
+  .spb-page-label{font-size:12px; font-weight:600; color:var(--ink-soft);}
+  .spb-achieve-rate{font-family:'IBM Plex Sans KR', sans-serif; font-size:13px; font-weight:600; color:var(--ink-soft); margin-left:2px;}
+
+  .subject-progress-block.goal-achieved,
+  .subject-progress-block.spb-ontrack{
+    background: #FFF8E1; border-radius: var(--radius);
+    padding: 14px; border: 1px solid #FFD54F;
+    animation: achieve-pop .35s ease;
+  }
+  .goal-achieved-badge{
+    display: inline-block; background: linear-gradient(135deg, #FFD54F, #FFB300); color: #5C4200;
+    font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 20px;
+    margin-bottom: 8px; box-shadow: 0 2px 10px rgba(255, 179, 0, 0.45);
+  }
+  @keyframes achieve-pop{
+    0%{ transform: scale(0.97); }
+    50%{ transform: scale(1.01); }
+    100%{ transform: scale(1); }
+  }
+  .spb-pace{font-weight:500; font-size:12px; color:var(--ink-soft);}
+  .sub-metric-label{font-size:11px; color:var(--ink-soft); margin-top:14px; margin-bottom:2px; font-weight:600;}
+  .subject-progress-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px 28px;}
+  @media (max-width:680px){ .subject-progress-grid{grid-template-columns:1fr;} }
+  .subject-progress-grid .subject-progress-block{border-bottom:none; padding-bottom:0;}
+  .subject-progress-grid .subject-progress-block.goal-achieved,
+  .subject-progress-grid .subject-progress-block.spb-ontrack{padding-bottom:14px;}
+
+  .today-compact-list{display:flex; flex-direction:column; gap:10px;}
+  .today-compact-row{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:10px 12px; border-radius:10px; background:#FAFBFA; border:1px solid var(--line);
+    transition:background .3s ease, border-color .3s ease;
+  }
+  .today-compact-row.tcr-achieved{
+    background:#FFF8E1; border-color:#FFD54F;
+    animation:achieve-pop .35s ease;
+  }
+  .tcr-check{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; border-radius:50%; background:#FFB300; color:#fff;
+    font-size:10px; font-weight:700; margin-left:2px; vertical-align:middle;
+  }
+  .tcr-name{font-weight:600; font-size:13px; flex:0 0 78px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .tcr-metric{display:flex; align-items:center; gap:6px; flex:1; min-width:110px;}
+  .tcr-label{font-size:11px; color:var(--ink-soft); flex:0 0 auto; white-space:nowrap;}
+  .tcr-bar-track{flex:1; height:6px; background:#EDF0EE; border-radius:3px; overflow:hidden;}
+  .tcr-bar-fill{height:100%; border-radius:3px;}
+  .tcr-pct{font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; flex:0 0 34px; text-align:right;}
+  .ruler-round-mark{position:absolute; top:0; bottom:0; width:1px; background:rgba(27,43,41,0.28); z-index:1;}
+  .dot{width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:5px; vertical-align:-1px;}
+
+  .pct-big{font-size:15px; color:var(--ink-soft); margin-top:2px;}
+  .pct-big b{color:var(--ink); font-size:17px;}
+  .ideal-line{font-size:12px; color:var(--goal); margin-top:4px; font-weight:600;}
+
+  .log-form{display:flex; flex-direction:column; gap:12px;}
+  .log-form > div{width:100%;}
+  .log-form button{width:100%;}
+
+  .log-list{margin-top:14px; display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto;}
+  .log-item{display:flex; justify-content:space-between; align-items:center; font-size:14px; padding:8px 10px; border-radius:8px; background:#FAFBFA;}
+  .log-item-actions{display:flex; align-items:center; gap:2px; flex-shrink:0;}
+  .log-item-actions .link-btn{padding:4px 6px;}
+  .log-item .d{color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; font-size:13px;}
+  .log-form-inline{display:flex; gap:8px; margin-top:12px;}
+  .log-form-inline input{flex:1; padding:9px 12px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:'IBM Plex Sans KR', sans-serif; background:#FBFCFB;}
+  .log-form-inline button{flex:0 0 auto; padding:9px 16px; font-size:13px;}
+  .mini-log-list{margin-top:10px; display:flex; flex-direction:column; gap:5px; max-height:140px; overflow:auto;}
+  .mini-log-list .log-item{font-size:13px; padding:6px 9px;}
+
+  .empty{text-align:center; padding:60px 20px; color:var(--ink-soft);}
+  .empty h2{color:var(--ink); font-size:22px; margin-bottom:10px;}
+
+  .section-title{font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:10px;}
+  .period-bar{display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px;}
+  .period-bar .pb-field{flex:0 1 180px; min-width:140px;}
+  .period-bar label{margin-bottom:4px;}
+  .period-bar button{padding:10px 20px;}
+  .pb-hint{flex:1 1 100%; font-size:12px; color:var(--ink-soft); line-height:1.55;}
+  .dday-cap{font-size:11px; color:var(--ink-soft); text-align:right; margin-top:4px; white-space:nowrap;}
+  .day-count-badge{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--progress); background:var(--progress-soft); padding:2px 8px; border-radius:10px; font-weight:600;}
+
+  .summary-stats{display:flex; flex-direction:column; gap:14px;}
+  .summary-warning{
+    font-size:14px; font-weight:700; color:#fff; background:#E0483C;
+    padding:12px 16px; border-radius:10px; text-align:center;
+    animation:dday-pulse 1.6s ease-in-out infinite;
+  }
+  .summary-streak{
+    font-size:22px; font-weight:700; color:var(--ink);
+    background:var(--goal-soft); padding:12px 16px; border-radius:10px; text-align:center;
+  }
+  .summary-streak-num{font-family:'IBM Plex Mono', monospace; color:var(--goal); font-size:28px;}
+  .summary-streak-milestone{
+    background:linear-gradient(135deg, #FFD54F, #FFB300); color:#5C4200;
+    box-shadow:0 4px 16px rgba(255,179,0,0.45); animation:achieve-pop .4s ease;
+  }
+  .summary-streak-milestone .summary-streak-num{color:#5C4200;}
+  .summary-totals{
+    display:flex; flex-direction:column; gap:8px; align-items:center;
+    background:#FAFBFA; border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+  }
+  .summary-total-pages{font-size:14px; color:var(--ink);}
+  .summary-total-pages b{font-family:'IBM Plex Mono', monospace; font-size:22px; color:var(--progress);}
+  .summary-compare{font-size:13px; color:var(--ink-soft);}
+  .summary-compare-up{color:var(--progress); font-weight:600;}
+  .summary-compare-down{color:var(--behind); font-weight:600;}
+  .summary-eta-list{display:flex; flex-direction:column; gap:8px;}
+  .summary-eta-row{font-size:13px; color:var(--ink); padding:8px 10px; background:#FAFBFA; border-radius:8px; border:1px solid var(--line);}
+  .summary-eta-good{color:var(--progress); font-weight:600;}
+  .summary-eta-bad{color:var(--behind); font-weight:600;}
+  .weekday-badge{font-weight:600; color:var(--ink);}
+
+  .confetti-container{position:fixed; inset:0; pointer-events:none; z-index:2000; overflow:hidden;}
+  .confetti-piece{
+    position:absolute; top:-20px; width:8px; height:14px; opacity:0.9; border-radius:2px;
+    animation-name:confetti-fall; animation-timing-function:ease-in; animation-fill-mode:forwards;
+  }
+  @keyframes confetti-fall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(105vh) rotate(var(--rot, 360deg)); opacity:0; }
+  }
+
+  .view-switch{display:flex; gap:8px; margin-bottom:20px;}
+  .view-switch-btn{
+    flex:1; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--card);
+    font-size:14px; font-weight:600; color:var(--ink-soft); cursor:pointer;
+  }
+  .view-switch-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  .review-group-title{font-size:14px; font-weight:600; margin-bottom:8px;}
+  .review-group-title .rd{font-weight:500; color:var(--ink-soft); font-size:12px; font-family:'IBM Plex Mono', monospace;}
+  .review-item{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px;
+    background:#FAFBFA; border:1px solid var(--line); margin-bottom:8px;
+    transition:background .25s ease, border-color .25s ease;
+  }
+  .review-item input[type=checkbox]{width:20px; height:20px; flex-shrink:0; accent-color:#E0483C; cursor:pointer;}
+  .review-item label{margin-bottom:0; font-size:14px; color:var(--ink); flex:1; cursor:pointer;}
+  .review-item.checked{
+    background:#FDECEA; border-color:#E0483C;
+    animation:achieve-pop .3s ease;
+  }
+  .review-item.checked label{color:#B23325; font-weight:600;}
+  .review-item.checked::after{
+    content:"달성! ✓"; color:#fff; font-weight:800; font-size:11px; flex-shrink:0;
+    background:#E0483C; padding:4px 9px; border-radius:20px;
+    box-shadow:0 2px 8px rgba(224, 72, 60, 0.4);
+  }
+  .review-empty{font-size:13px; color:var(--ink-soft); padding:4px 2px 16px;}
+
+  .review-overall-rate{font-size:14px; font-weight:600; color:var(--ink); background:var(--progress-soft); padding:10px 14px; border-radius:10px; margin-bottom:10px;}
+  .review-overall-rate b{color:var(--progress); font-family:'IBM Plex Mono', monospace; font-size:16px;}
+
+  .review-monthly-rate{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .review-month-badge{
+    font-size:12px; font-weight:600; color:var(--ink); background:#FAFBFA; border:1px solid var(--line);
+    padding:6px 10px; border-radius:8px; font-family:'IBM Plex Mono', monospace;
+  }
+  .review-month-badge b{color:var(--progress); margin-left:2px;}
+
+  .review-grid-legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--ink-soft); margin-bottom:14px;}
+  .review-grid-legend .rg-cell{width:12px; height:12px; border-radius:3px; display:inline-block; margin-right:5px; vertical-align:-2px;}
+
+  .review-table{width:100%; border-collapse:collapse; font-size:12px;}
+  .review-table-wrap{max-height:480px; overflow-y:auto; border:1px solid var(--line); border-radius:8px;}
+  .review-table thead th{
+    font-family:'IBM Plex Mono', monospace; font-weight:600; color:var(--ink-soft); font-size:11px;
+    text-align:center; padding:6px 4px; border-bottom:2px solid var(--line); position:sticky; top:0; background:var(--card);
+  }
+  .review-table thead th:first-child{text-align:left;}
+  .review-table tbody td{padding:5px 4px; text-align:center; border-bottom:1px solid var(--paper-line);}
+  .review-table tbody td:first-child{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); text-align:left; white-space:nowrap;
+  }
+  .review-table tbody tr.review-row-today td:first-child{color:var(--progress); font-weight:700;}
+  .rg-cell{width:16px; height:16px; border-radius:3px; display:inline-block;}
+  .rg-full{background:var(--progress);}
+  .rg-partial{background:var(--goal);}
+  .rg-empty{background:#E3E7E4; border:1px solid var(--line);}
+  .rg-na{background:transparent; border:1px dashed var(--line);}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:#fff; padding:12px 20px; border-radius:10px;
+    font-size:14px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    z-index:1000; max-width:85%; text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .chart-wrap{height:260px; margin-top:6px;}
+
+  .overview-list{display:flex; flex-direction:column; gap:8px;}
+  .ov-item{display:flex; align-items:center; gap:12px; font-size:14px;}
+  .ov-item .ov-name{width:90px; font-weight:600; flex-shrink:0;}
+  .ov-bar-track{flex:1; height:8px; background:#EDF0EE; border-radius:4px; overflow:hidden;}
+  .ov-bar-fill{height:100%; background:var(--progress); border-radius:4px;}
+  .ov-item .ov-pct{width:44px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:13px; flex-shrink:0;}
+  .ov-item .ov-detail{width:76px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); flex-shrink:0;}
+
+  .hidden{display:none !important;}
+  .link-btn{background:none; border:none; color:var(--progress); font-size:13px; font-weight:600; cursor:pointer; padding:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top-bar">
+    <div>
+      <div class="app-title">효정 노무사 공부 진도율</div>
+      <div class="app-sub" id="periodSummary">공부 기간과 과목을 먼저 설정하세요</div>
+    </div>
+    <div id="ddayBadge"></div>
+  </div>
+
+  <div id="motivationQuote" class="motivation-quote"></div>
+
+  <!-- 대시보드 -->
+  <div id="dashboardView" class="hidden stack">
+
+    <div class="period-bar">
+      <div class="pb-field">
+        <label for="startDateTop">공부 시작일</label>
+        <input type="date" id="startDateTop">
+      </div>
+      <div class="pb-field">
+        <label for="endDateTop">공부 종료일</label>
+        <input type="date" id="endDateTop">
+      </div>
+      <button type="button" id="applyPeriodBtn">적용</button>
+      <div class="pb-hint">오른쪽 위 D-day는 <b>종료일까지</b> 남은 날이에요. 진도 계산은 시작일부터 종료일 사이의 <b>공부 요일(월~금)</b>만 세요. 시작 전에 이미 읽은 분량은 아래 "과목별 페이지 설정"의 <b>기존</b>에 넣어두세요.</div>
+    </div>
+
+    <div class="view-switch">
+      <button type="button" class="view-switch-btn active" id="viewProgressBtn">진도율</button>
+      <button type="button" class="view-switch-btn" id="viewReviewBtn">1-4-7-14 복습 체크리스트</button>
+    </div>
+
+    <div id="progressTabContent" class="stack">
+
+    <div class="card">
+      <div class="section-title">공부 현황 요약</div>
+      <div id="summaryStats" class="summary-stats"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">오늘의 목표 · <span id="todayDateLabel"></span> <span id="dayCountLabel" class="day-count-badge"></span></div>
+      <div style="margin-bottom:18px; display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap;">
+        <div style="width:200px;">
+          <label for="logDate">기록할 날짜 <span id="logDateWeekday" class="weekday-badge"></span></label>
+          <input type="date" id="logDate">
+        </div>
+        <button type="button" id="logDateApplyBtn" style="padding:10px 16px;">적용하기</button>
+        <button type="button" class="subtle" id="logDateTodayBtn" style="padding:10px 14px;">오늘</button>
+      </div>
+      <div id="allGoalsList" class="subject-progress-grid"></div>
+      <div class="carry-note" style="margin-top:16px;">오늘 목표를 못 채우면, 남은 분량이 내일 목표에 자동으로 더해져요.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">오늘 하루 과목별 진행률</div>
+      <div id="todayProgressList" class="today-compact-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">전체 과목 통합 진행률</div>
+      <div id="subjectProgressList" class="subject-progress-grid"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="section-title" style="margin-bottom:0;">과목별 페이지 설정</div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button type="button" class="link-btn" id="addTabBtn">+ 과목 추가</button>
+          <button type="button" id="applySubjectEditsBtn">적용하기</button>
+        </div>
+      </div>
+      <div class="add-subject-inline hidden" id="addSubjectInline" style="margin-bottom:14px;">
+        <input type="text" id="newSubjectName" placeholder="새 과목명 입력">
+        <button type="button" id="confirmAddSubjectBtn">추가</button>
+        <button type="button" class="subtle" id="cancelAddSubjectBtn">취소</button>
+      </div>
+      <div style="font-size:12px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">
+        "격주 교대"를 켜면 시작일이 속한 주(시작일이 일요일이면 그다음 주)를 첫 주로 해서 첫 주 요일 → 다음 주 요일 순서로 번갈아요. "목표 회독"은 과목마다 따로 정해요. "현재 회독 · 기존 페이지"는 앱을 쓰기 전에 이미 읽은 위치예요 (예: 2회독 50p). 특정 날짜의 기록으로 남기지 않고 별도로 반영되기 때문에, 하루 만에 다 읽은 것처럼 기록에 남지 않아요. 값을 입력한 뒤 위 "적용하기"를 눌러야 반영돼요.
+      </div>
+      <div id="subjectEditList" class="subject-progress-grid"></div>
+      <div style="display:flex; gap:14px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); align-items:center; flex-wrap:wrap;">
+        <button type="button" class="link-btn" id="exportBackupBtn">내보내기</button>
+        <button type="button" class="link-btn" id="importBackupBtn">가져오기</button>
+        <input type="file" id="importBackupFile" accept="application/json" class="hidden">
+        <button type="button" class="link-btn" id="resetDefaultBtn" style="color:var(--behind);">기본값으로 재설정</button>
+      </div>
+    </div>
+
+    <div class="card" id="calendarCard">
+      <div class="section-title">공부 달력</div>
+      <div class="cal-head">
+        <button type="button" class="tab-arrow" id="calPrevBtn" aria-label="이전 달">‹</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button type="button" class="tab-arrow" id="calNextBtn" aria-label="다음 달">›</button>
+        <button type="button" class="subtle cal-today-btn" id="calTodayBtn">오늘</button>
+      </div>
+      <div id="calMonthSummary" class="cal-summary"></div>
+      <div class="cal-legend">
+        <span><i style="background:#2F6F4F;"></i>과목 달성</span>
+        <span><i style="background:#F0B866;"></i>일부</span>
+        <span><i style="background:#E7A090;"></i>못 함</span>
+        <span><i style="background:#E9EEEB;"></i>예정·진행 전</span>
+        <span><i style="background:#C9E6D5; border:2px solid #2F6F4F;"></i>✓ 그날 전체 달성</span>
+        <span><i style="background:#fff; border:2px solid var(--ink);"></i>● 오늘(진행 중)</span>
+        <span><i style="background:#F3F5F4; border:1px solid var(--line);"></i>쉬는 날 · 기록 전</span>
+      </div>
+      <div class="cal-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+      <div id="calendarGrid" class="cal-grid"></div>
+      <div id="calDayDetail" class="cal-detail"></div>
+    </div>
+
+    </div>
+
+    <div id="reviewTabContent" class="stack hidden">
+      <div class="card review-hero-card">
+        <div class="section-title">1-4-7-14 복습 체크리스트 · <span id="reviewDateLabel"></span></div>
+        <div style="margin-bottom:14px; display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap;">
+          <div style="width:200px;">
+            <label for="reviewDateInput" style="color:#8A6D00;">복습할 날짜 <span id="reviewDateWeekday" class="weekday-badge"></span></label>
+            <input type="date" id="reviewDateInput">
+          </div>
+          <button type="button" id="reviewDateApplyBtn" style="padding:10px 16px;">적용하기</button>
+          <button type="button" class="subtle" id="reviewDateTodayBtn" style="padding:10px 14px;">오늘</button>
+        </div>
+        <div style="font-size:13px; color:#8A6D00; margin-bottom:16px; line-height:1.5;">
+          1일 전 · 4일 전 · 7일 전 · 14일 전에 <b>실제로 공부해서 기록한 분량</b>을 복습하는 날이에요. 그날 기록이 없으면 복습할 내용도 없어요. 기록을 수정하면 복습 범위도 같이 바뀌어요.
+        </div>
+        <div id="reviewChecklist" class="subject-progress-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">전체 복습 체크리스트</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;">
+          날짜별로 1·4·7·14일 전 복습을 얼마나 체크했는지 한눈에 보여줘요. 위 오늘 체크리스트와 같은 데이터라서, 체크하면 여기도 같이 채워져요. 최근 날짜가 위로 오도록 정렬했어요.
+        </div>
+        <div id="reviewOverallRate" class="review-overall-rate"></div>
+        <div id="reviewMonthlyRate" class="review-monthly-rate"></div>
+        <div class="review-grid-legend">
+          <span><span class="rg-cell rg-full"></span>전부 체크</span>
+          <span><span class="rg-cell rg-partial"></span>일부 체크</span>
+          <span><span class="rg-cell rg-empty"></span>미체크</span>
+          <span><span class="rg-cell rg-na"></span>해당 없음</span>
+        </div>
+        <div class="review-table-wrap">
+          <table class="review-table">
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>1일 전</th>
+                <th>4일 전</th>
+                <th>7일 전</th>
+                <th>14일 전</th>
+              </tr>
+            </thead>
+            <tbody id="reviewFullGrid"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="reviewCalendarCard">
+        <div class="section-title">복습 달력 · 날짜별 복습 진도율</div>
+        <div class="cal-head">
+          <button type="button" class="tab-arrow" id="rcPrevBtn" aria-label="이전 달">‹</button>
+          <div class="cal-title" id="rcTitle"></div>
+          <button type="button" class="tab-arrow" id="rcNextBtn" aria-label="다음 달">›</button>
+          <button type="button" class="subtle cal-today-btn" id="rcTodayBtn">오늘</button>
+        </div>
+        <div id="rcSummary" class="cal-summary"></div>
+        <div class="cal-legend">
+          <span><i style="background:#C9E6D5; border:2px solid #2F6F4F;"></i>✓ 그날 복습 전부 완료</span>
+          <span><i style="background:#F6E7D2;"></i>△ 일부 완료</span>
+          <span><i style="background:#F5DED7;"></i>✕ 못 함</span>
+          <span><i style="background:#fff; border:2px solid var(--ink);"></i>● 오늘(진행 중)</span>
+          <span><i style="background:#F3F5F4; border:1px solid var(--line);"></i>복습할 것 없음</span>
+        </div>
+        <div class="cal-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+        <div id="rcGrid" class="cal-grid"></div>
+        <div id="rcDetail" class="cal-detail"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// If not running inside a Claude artifact (window.storage not injected), fall back to
+// the browser's own localStorage — same interface, so the rest of the app doesn't
+// need to know which one it's using. This makes the file work as a fully standalone
+// page, opened directly or hosted anywhere, with no Claude involved.
+if(typeof window.storage === 'undefined'){
+  const LS_PREFIX = 'sptracker_';
+  window.storage = {
+    async get(key, shared){
+      const raw = localStorage.getItem(LS_PREFIX + (shared ? 'shared_' : '') + key);
+      if(raw === null) throw new Error('not found');
+      return { key, value: raw, shared: !!shared };
+    },
+    async set(key, value, shared){
+      localStorage.setItem(LS_PREFIX + (shared ? 'shared_' : '') + key, value);
+      return { key, value, shared: !!shared };
+    },
+    async delete(key, shared){
+      localStorage.removeItem(LS_PREFIX + (shared ? 'shared_' : '') + key);
+      return { key, deleted: true, shared: !!shared };
+    },
+    async list(prefix, shared){
+      const p = LS_PREFIX + (shared ? 'shared_' : '') + (prefix || '');
+      const keys = [];
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        if(k && k.startsWith(p)) keys.push(k.slice(LS_PREFIX.length + (shared ? 7 : 0)));
+      }
+      return { keys, prefix, shared: !!shared };
+    }
+  };
+}
+
+const $ = (id) => document.getElementById(id);
+let plan = null;          // { startDate, endDate, subjects: [{id,name,totalPages}] }
+let logs = {};            // { [subjectId]: { [date]: pages } }
+let reviewChecks = {};    // { "todayStr_offset_subjectId": true }
+let activeSubjectId = null;
+
+// alert() can be silently blocked inside a sandboxed artifact frame, so use an
+// on-screen toast for all validation messages instead.
+let toastTimer = null;
+function showToast(msg){
+  const el = $('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+const alert = showToast;
+
+// ---------- date helpers ----------
+function toDate(str){ const [y,m,d] = str.split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); }
+function fmt(d){ return d.toISOString().slice(0,10); }
+function todayUTC(){ const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); }
+// '기록할 날짜'로 고른 날. 비어 있으면 진짜 오늘. 오늘의 목표·복습 체크리스트는 이 날짜를 '오늘'처럼 기준으로 삼아요.
+let appliedDateStr = null;
+function viewDate(){
+  return (appliedDateStr && /^\d{4}-\d{2}-\d{2}$/.test(appliedDateStr)) ? toDate(appliedDateStr) : todayUTC();
+}
+function diffDays(a,b){ return Math.round((b - a) / 86400000); }
+function md(str){ const [,m,d] = str.split('-'); return `${parseInt(m)}.${parseInt(d)}`; }
+function cleanName(n){ return String(n).replace(/[<>"&]/g, '').trim(); }
+function koreanDateLabel(d){ return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일`; }
+const KOREAN_WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+// ---------- study-day helpers (과목별 공부 요일) ----------
+// Each subject has studyDays: weekday numbers (0=일 ... 6=토) it is actually studied on.
+// Progress goals are spread over THOSE days only, so weekends (or any rest day) don't
+// count against the pace. Default: 월~금. 경영학 월수금 / 사회보험 화목 are applied by ensureStudyDays().
+const WEEKDAYS_MON_FRI = [1, 2, 3, 4, 5];
+const DEFAULT_STUDY_DAYS_BY_ID = { s_biz657: [1, 3, 5], s_social470: [2, 4] };
+// 격주 교대: 첫 주에 월수금이면 다음 주는 화목 (경영학 ↔ 사회보험법이 번갈아 바뀜)
+const DEFAULT_ALT_STUDY_DAYS_BY_ID = { s_biz657: [2, 4], s_social470: [1, 3, 5] };
+function defaultAltStudyDaysFor(subject){
+  if(DEFAULT_ALT_STUDY_DAYS_BY_ID[subject.id]) return DEFAULT_ALT_STUDY_DAYS_BY_ID[subject.id].slice();
+  const name = subject.name || '';
+  if(name.includes('경영')) return [2, 4];
+  if(name.includes('사회보험')) return [1, 3, 5];
+  return null;
+}
+
+function defaultStudyDaysFor(subject){
+  if(DEFAULT_STUDY_DAYS_BY_ID[subject.id]) return DEFAULT_STUDY_DAYS_BY_ID[subject.id].slice();
+  const name = subject.name || '';
+  if(name.includes('경영')) return [1, 3, 5];
+  if(name.includes('사회보험')) return [2, 4];
+  return WEEKDAYS_MON_FRI.slice();
+}
+// Fills in studyDays for any subject saved before this feature existed (keeps all logs untouched).
+function ensureStudyDays(){
+  if(!plan || !Array.isArray(plan.subjects)) return;
+  plan.subjects.forEach(s => {
+    if(!Array.isArray(s.studyDays) || !s.studyDays.length){
+      s.studyDays = defaultStudyDaysFor(s);
+    }
+    // studyDaysAlt: 다음 주(격주) 요일. undefined=아직 설정 안 함 → 기본값, null=격주 안 씀
+    if(s.studyDaysAlt === undefined) s.studyDaysAlt = defaultAltStudyDaysFor(s);
+    if(Array.isArray(s.studyDaysAlt) && !s.studyDaysAlt.length) s.studyDaysAlt = null;
+  });
+}
+// 과목별 목표 회독수가 없던 옛 데이터: 기존 전체 회독수(plan.repeats)를 각 과목에 복사해 둠.
+function ensureRepeats(){
+  if(!plan || !Array.isArray(plan.subjects)) return;
+  plan.subjects.forEach(s => {
+    if(!(parseInt(s.repeats, 10) >= 1)) s.repeats = Math.max(1, parseInt(plan.repeats, 10) || 1);
+  });
+}
+function subjectStudyDays(subject){
+  return (Array.isArray(subject.studyDays) && subject.studyDays.length) ? subject.studyDays : WEEKDAYS_MON_FRI;
+}
+function subjectAltDays(subject){
+  return (Array.isArray(subject.studyDaysAlt) && subject.studyDaysAlt.length) ? subject.studyDaysAlt : null;
+}
+// 격주 기준: 시작일이 속한 주(월~일)가 '첫 주'. 시작일이 일요일이면 바로 다음 날(월)부터가 첫 주.
+let _anchorKey = null, _anchorVal = 0;
+function anchorMondayNum(){
+  if(_anchorKey !== plan.startDate){
+    let n = Math.round(toDate(plan.startDate).getTime() / 86400000);
+    if(((n + 4) % 7) === 0) n += 1;            // 일요일 -> 월요일
+    _anchorVal = n - ((((n + 4) % 7) + 6) % 7); // 그 주의 월요일
+    _anchorKey = plan.startDate;
+  }
+  return _anchorVal;
+}
+function dayMask(days){ let m = 0; days.forEach(d => { m |= (1 << d); }); return m; }
+function masksFor(subject){
+  const alt = subjectAltDays(subject);
+  return [dayMask(subjectStudyDays(subject)), alt ? dayMask(alt) : null];
+}
+// dayNum = UTC 날짜를 일 단위 숫자로 (1970-01-01 = 목요일)
+function studiedOnDayNum(masks, dayNum){
+  const wd = (dayNum + 4) % 7;                       // 0=일 ... 6=토
+  let mask = masks[0];
+  if(masks[1] !== null){
+    const weekIdx = Math.floor((dayNum - ((wd + 6) % 7) - anchorMondayNum()) / 7);
+    if(weekIdx & 1) mask = masks[1];
+  }
+  return (mask >> wd) & 1;
+}
+function dateNum(d){ return Math.round(d.getTime() / 86400000); }
+// 그 날짜가 속한 주에 적용되는 요일 목록
+function studyDaysForDate(subject, date){
+  const alt = subjectAltDays(subject);
+  if(!alt) return subjectStudyDays(subject);
+  const n = dateNum(date);
+  const wd = (n + 4) % 7;
+  const weekIdx = Math.floor((n - ((wd + 6) % 7) - anchorMondayNum()) / 7);
+  return (weekIdx & 1) ? alt : subjectStudyDays(subject);
+}
+function studyDaysLabel(subject, date){
+  const days = studyDaysForDate(subject, date || todayUTC()).slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)); // 월요일부터
+  return days.map(d => KOREAN_WEEKDAYS[d]).join('·') + (subjectAltDays(subject) ? ' (이번 주, 격주 교대)' : '');
+}
+function isStudyDay(subject, date){
+  return !!studiedOnDayNum(masksFor(subject), dateNum(date));
+}
+// Number of this subject's study days within [a, b] (inclusive).
+function countStudyDays(subject, a, b){
+  if(b < a) return 0;
+  const masks = masksFor(subject);
+  const from = dateNum(a), to = dateNum(b);
+  let count = 0;
+  for(let n = from; n <= to; n++) count += studiedOnDayNum(masks, n);
+  return count;
+}
+// The date of the n-th study day AFTER `from` (n >= 1). Used to project completion dates.
+function addStudyDays(subject, from, n){
+  const d = new Date(from);
+  let left = n, guard = 0;
+  while(left > 0 && guard < 10000){
+    d.setUTCDate(d.getUTCDate() + 1);
+    guard++;
+    if(isStudyDay(subject, d)) left--;
+  }
+  return d;
+}
+
+const MOTIVATION_QUOTES = [
+  '지금 이 순간에도 경쟁자는 책장을 넘기고 있어요.',
+  '불합격자의 스펙 1위는 "내일부터"예요.',
+  '오늘 안 넘긴 페이지는 내년에도 그대로예요.',
+  '남들 잘 때 넘긴 한 페이지가 이름을 바꿔요.',
+  '1년 벌면 10년이 편해져요, 지금은 버틸 시간이에요.',
+  '핑계 댈 시간에 한 줄이라도 더 읽어요.',
+  '졸린 눈 비비고 넘긴 이 페이지가 나를 증명해요.',
+  '합격수기엔 항상 "그날도 포기하고 싶었다"가 있어요.',
+  '지금 덮고 싶은 이 순간이 바로 실력이 갈리는 지점이에요.',
+  '오늘 하루 논 만큼 합격 발표는 늦어져요.',
+  '내년의 나에게 미루지 마세요, 그 사람도 지쳐 있어요.',
+  '시험장에서 아는 문제, 지금 이 페이지일 수도 있어요.',
+  '딱 오늘만 버티면 내일의 내가 고마워해요.',
+  '노력은 티 안 낼 뿐, 배신하지 않아요.',
+  '합격은 특별한 사람이 아니라 포기 안 한 사람의 몫이에요.',
+  '몸이 힘든 게 아니라 마음이 약해지려는 거예요.',
+  '지금이 인생에서 가장 시간 많고 젊은 때예요.',
+  '펜을 놓는 순간, 합격도 같이 멀어져요.',
+  '작심삼일도 100번이면 1년이 돼요.',
+  '오늘의 나태함은 내년 재수생 명단으로 돌아와요.',
+  '경쟁자들도 지금 이 문장을 읽고 다시 책을 펴요.',
+  '고생은 합격만이 보상해줘요, 포기는 보상이 없어요.',
+  '지금 이 페이지가 못 본 척한 페이지가 되지 않게 하세요.',
+  '결과는 방향이 맞은 노력만 배신하지 않아요.'
+];
+
+function getRandomQuote(){
+  return MOTIVATION_QUOTES[Math.floor(Math.random() * MOTIVATION_QUOTES.length)];
+}
+
+function renderMotivationQuote(){
+  $('motivationQuote').textContent = getRandomQuote();
+}
+
+function updateLogDateWeekday(){
+  const val = $('logDate').value;
+  if(!val){ $('logDateWeekday').textContent = ''; return; }
+  const d = toDate(val);
+  $('logDateWeekday').textContent = `(${KOREAN_WEEKDAYS[d.getUTCDay()]})`;
+}
+$('logDate').addEventListener('input', updateLogDateWeekday);
+// 날짜를 바꾸면 그 날짜를 '오늘'처럼 보고 목표·진행률·복습 체크리스트·달력을 다시 그림
+function applyDate(v){
+  if(!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) v = fmt(todayUTC());
+  appliedDateStr = v;
+  $('logDate').value = v;
+  updateLogDateWeekday();
+  syncReviewDateInput();
+  if(!plan) return;
+  const d = viewDate();
+  calSelected = fmt(d); calYear = d.getUTCFullYear(); calMonth = d.getUTCMonth();
+  renderAllGoals();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderReviewChecklist();
+  renderReviewFullGrid();
+  renderSummaryStats();
+}
+$('logDate').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); applyDate($('logDate').value); } });
+// 복습 탭의 날짜 칸도 같은 날짜(logDate)를 공유해요
+function syncReviewDateInput(){
+  const v = $('logDate').value;
+  $('reviewDateInput').value = v;
+  $('reviewDateWeekday').textContent = v ? `(${KOREAN_WEEKDAYS[toDate(v).getUTCDay()]})` : '';
+}
+function updateReviewDateWeekday(){
+  const v = $('reviewDateInput').value;
+  $('reviewDateWeekday').textContent = v ? `(${KOREAN_WEEKDAYS[toDate(v).getUTCDay()]})` : '';
+}
+$('reviewDateInput').addEventListener('input', updateReviewDateWeekday);
+$('reviewDateInput').addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); applyDate($('reviewDateInput').value); } });
+// 날짜를 고른 뒤 '적용하기'를 눌러야 그 날짜로 이동해요
+$('logDateApplyBtn').onclick = () => applyDate($('logDate').value);
+$('reviewDateApplyBtn').onclick = () => applyDate($('reviewDateInput').value);
+$('logDateTodayBtn').onclick = $('reviewDateTodayBtn').onclick = () => applyDate(fmt(todayUTC()));
+// overallIndex: 1-based position counting across all repeats (e.g. 250 with totalPages=200 -> 2회독 50p)
+function bookPosition(overallIndex, totalPages){
+  const round = Math.floor((overallIndex - 1) / totalPages) + 1;
+  const page = ((overallIndex - 1) % totalPages) + 1;
+  return { round, page };
+}
+
+// Computes the "○회독 89p ~ 96p" style range text for a subject's remaining today-goal.
+function todayGoalRangeText(subject, st){
+  if(st.remainingPages === 0 || st.todayGoal === 0) return '';
+  const repeats = subjectRepeats(subject);
+  const startIdx = st.prevCumulative + 1;
+  const endIdx = st.todayTargetCumulative;
+  const startPos = bookPosition(startIdx, subject.totalPages);
+  const endPos = bookPosition(endIdx, subject.totalPages);
+  const roundTag = (r) => repeats > 1 ? `${r}회독 ` : '';
+  if(startPos.round === endPos.round){
+    return `${roundTag(startPos.round)}${startPos.page}p ~ ${endPos.page}p`;
+  }
+  return `${roundTag(startPos.round)}${startPos.page}p ~ ${subject.totalPages}p 이어서 ${roundTag(endPos.round)}1p ~ ${endPos.page}p`;
+}
+
+// Sum of a subject's logged pages strictly BEFORE dateStr (excludes dateStr itself),
+// plus any pre-tracking baseline progress (subject.baseline) which isn't tied to a date.
+function cumulativeBefore(subjectId, dateStr){
+  const subject = plan.subjects.find(s => s.id === subjectId);
+  const baseline = (subject && subject.baseline) || 0;
+  const dayLog = logs[subjectId] || {};
+  let sum = baseline;
+  for(const [d, p] of Object.entries(dayLog)){ if(d < dateStr) sum += Number(p) || 0; }
+  return sum;
+}
+
+// Converts a "page number reached" (within the current round) into an absolute
+// cumulative page count, given how many pages were already done before that date.
+function reachedPageToCumulative(reachedPage, totalPages, prevCumulative){
+  const prevRound = prevCumulative > 0 ? Math.floor((prevCumulative - 1) / totalPages) + 1 : 1;
+  const prevPageInRound = prevCumulative > 0 ? ((prevCumulative - 1) % totalPages) + 1 : 0;
+  const round = (prevCumulative > 0 && reachedPage < prevPageInRound) ? prevRound + 1 : prevRound;
+  return (round - 1) * totalPages + reachedPage;
+}
+
+// ---------- storage ----------
+async function loadState(){
+  try{ const r = await window.storage.get('plan', false); plan = r ? JSON.parse(r.value) : null; }catch(e){ plan = null; }
+  try{ const r = await window.storage.get('logs', false); logs = r ? JSON.parse(r.value) : {}; }catch(e){ logs = {}; }
+  try{ const r = await window.storage.get('reviewChecks', false); reviewChecks = r ? JSON.parse(r.value) : {}; }catch(e){ reviewChecks = {}; }
+}
+async function savePlan(){ try{ await window.storage.set('plan', JSON.stringify(plan), false); }catch(e){ console.warn('저장 실패(plan):', e); } }
+async function saveLogs(){ try{ await window.storage.set('logs', JSON.stringify(logs), false); }catch(e){ console.warn('저장 실패(logs):', e); } }
+async function saveReviewChecks(){ try{ await window.storage.set('reviewChecks', JSON.stringify(reviewChecks), false); }catch(e){ console.warn('저장 실패(reviewChecks):', e); } }
+
+let resetArmed = false;
+let resetArmTimer = null;
+$('resetDefaultBtn').onclick = async () => {
+  if(!resetArmed){
+    resetArmed = true;
+    $('resetDefaultBtn').textContent = '정말요? 한 번 더 누르면 초기화돼요';
+    showToast('현재 데이터가 모두 사라져요. 정말이면 버튼을 한 번 더 눌러주세요.');
+    clearTimeout(resetArmTimer);
+    resetArmTimer = setTimeout(() => {
+      resetArmed = false;
+      $('resetDefaultBtn').textContent = '기본값으로 재설정';
+    }, 4000);
+    return;
+  }
+  clearTimeout(resetArmTimer);
+  resetArmed = false;
+  $('resetDefaultBtn').textContent = '기본값으로 재설정';
+
+  plan = defaultPlan();
+  ensureStudyDays();
+  ensureRepeats();
+  logs = {};
+  plan.subjects.forEach(s => { logs[s.id] = {}; });
+  await savePlan();
+  await saveLogs();
+  activeSubjectId = plan.subjects[0].id;
+  showDashboard();
+  showToast('기본값으로 초기화했어요.');
+};
+
+// ---------- backup export / import ----------
+$('exportBackupBtn').onclick = () => {
+  const backup = {
+    exportedAt: fmt(todayUTC()),
+    plan,
+    logs,
+    reviewChecks
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `study-backup-${fmt(todayUTC())}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('백업 파일을 내려받았어요.');
+};
+
+$('importBackupBtn').onclick = () => {
+  $('importBackupFile').value = '';
+  $('importBackupFile').click();
+};
+
+$('importBackupFile').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if(!data || !data.plan || !Array.isArray(data.plan.subjects)){
+      showToast('올바른 백업 파일이 아니에요.');
+      return;
+    }
+    plan = data.plan;
+    ensureStudyDays();
+    ensureRepeats();
+  ensureRepeats();
+    logs = data.logs || {};
+    reviewChecks = data.reviewChecks || {};
+    await savePlan();
+    await saveLogs();
+    await saveReviewChecks();
+    activeSubjectId = plan.subjects[0] ? plan.subjects[0].id : null;
+    showDashboard();
+    showToast('백업을 불러왔어요.');
+  }catch(err){
+    showToast('파일을 읽는 중 문제가 생겼어요.');
+  }
+});
+
+// ---------- computation ----------
+// 과목별 목표 회독수 (옛 데이터는 plan.repeats 로 대체)
+function subjectRepeats(subject){ return Math.max(1, parseInt(subject && subject.repeats, 10) || (plan && plan.repeats) || 1); }
+function subjectTarget(subject){ return subject.totalPages * subjectRepeats(subject); }
+
+function subjectStats(subject){
+  const start = toDate(plan.startDate);
+  const end = toDate(plan.endDate);
+  const totalDays = diffDays(start, end) + 1;
+  const target = subjectTarget(subject);
+  let today = viewDate();
+  const clampedToday = today < start ? start : (today > end ? end : today);
+  // All pacing is counted in this subject's STUDY DAYS (see studyDays), not calendar days.
+  const yesterdayOfClamped = new Date(clampedToday); yesterdayOfClamped.setUTCDate(yesterdayOfClamped.getUTCDate() - 1);
+  const studyTotal = Math.max(countStudyDays(subject, start, end), 1);
+  const studyBeforeToday = countStudyDays(subject, start, yesterdayOfClamped); // study days strictly before today
+  const isStudyToday = isStudyDay(subject, clampedToday);
+  const studyThroughToday = studyBeforeToday + (isStudyToday ? 1 : 0);
+  const daysPassed = studyBeforeToday;
+  const daysRemaining = Math.max(studyTotal - studyBeforeToday, 1); // study days left, includes today when it is one
+  const dayLog = logs[subject.id] || {};
+  const baseline = subject.baseline || 0;
+  const cumulativeThrough = (dateStr) => {
+    let sum = baseline;
+    for(const [d,p] of Object.entries(dayLog)){ if(d <= dateStr) sum += Number(p) || 0; }
+    return sum;
+  };
+  const doneToDate = cumulativeThrough(fmt(clampedToday));
+  const remainingPages = Math.max(target - doneToDate, 0);
+  // Today's goal is fixed for the day: it's based on progress BEFORE today's own log entries,
+  // so it doesn't shrink as you log pages today (that would make "done/goal" exceed 100% oddly).
+  // Any shortfall or overshoot naturally carries into tomorrow's recalculation instead.
+  const prevCumulative = cumulativeBefore(subject.id, fmt(clampedToday));
+  const remainingBeforeToday = Math.max(target - prevCumulative, 0);
+  // On a rest day (a weekday this subject isn't scheduled, or a weekend) the goal is 0;
+  // the remaining pages are spread over the study days still ahead.
+  const todayGoal = (remainingBeforeToday > 0 && isStudyToday) ? Math.ceil(remainingBeforeToday / daysRemaining) : 0;
+  const todayTargetCumulative = Math.min(prevCumulative + todayGoal, target);
+  const idealCumulativeToday = Math.min(target, target * studyThroughToday / studyTotal);
+  const pct = Math.min(100, (doneToDate / target) * 100);
+  const idealPct = Math.min(100, (idealCumulativeToday / target) * 100);
+  const flatPace = target / studyTotal; // pages per study day
+  const pageDelta = doneToDate - idealCumulativeToday;
+  const dayDelta = flatPace > 0 ? pageDelta / flatPace : 0; // behind/ahead, in study days
+
+  return { totalDays, studyTotal, studyBeforeToday, studyThroughToday, isStudyToday, daysPassed, daysRemaining, doneToDate, remainingPages, todayGoal, prevCumulative, todayTargetCumulative, pct, idealPct, pageDelta, dayDelta, clampedToday, target };
+}
+
+// ---------- dashboard render ----------
+function renderTopBar(){
+  const start = toDate(plan.startDate), end = toDate(plan.endDate);
+  const totalDays = diffDays(start, end) + 1;
+  $('periodSummary').textContent = `${md(plan.startDate)} ~ ${md(plan.endDate)} · 총 ${totalDays}일`;
+  const today = todayUTC();
+  const dLeft = diffDays(today, end);
+  let ddayText;
+  if(today < start) ddayText = `D-${diffDays(today, start)} 시작 전`;
+  else if(dLeft > 0) ddayText = `D-${dLeft}`;
+  else if(dLeft === 0) ddayText = 'D-DAY';
+  else ddayText = `기간 종료 (D+${-dLeft})`;
+
+  // The closer the exam gets, the more urgent (red) the badge looks.
+  let ddayClass = '';
+  if(today >= start && dLeft >= 0){
+    if(dLeft <= 3) ddayClass = 'dday-critical';
+    else if(dLeft <= 7) ddayClass = 'dday-urgent';
+    else if(dLeft <= 30) ddayClass = 'dday-soon';
+  }
+  const capText = today < start ? `시작일(${md(plan.startDate)})까지` : `종료일(${md(plan.endDate)})까지`;
+  $('ddayBadge').innerHTML = `<span class="dday ${ddayClass}">${ddayText}</span><div class="dday-cap">${capText}</div>`;
+}
+
+// ---------- streak + estimated completion ----------
+function anyLoggedOn(dateStr){
+  return plan.subjects.some(s => (Number((logs[s.id] || {})[dateStr]) || 0) > 0);
+}
+
+function computeStreak(){
+  let streak = 0;
+  const d = todayUTC();
+  if(!anyLoggedOn(fmt(d))){ d.setUTCDate(d.getUTCDate() - 1); }
+  while(anyLoggedOn(fmt(d))){
+    streak++;
+    d.setUTCDate(d.getUTCDate() - 1);
+  }
+  return streak;
+}
+
+// Consecutive days (not counting today, since today isn't over) with NO study logged at all.
+function computeInactivityStreak(){
+  const start = toDate(plan.startDate);
+  let streak = 0;
+  const d = todayUTC();
+  d.setUTCDate(d.getUTCDate() - 1);
+  while(d >= start && !anyLoggedOn(fmt(d))){
+    streak++;
+    d.setUTCDate(d.getUTCDate() - 1);
+  }
+  return streak;
+}
+
+// Projects a completion date from the subject's ACTUAL average pace since the plan started
+// (excluding the pre-tracking baseline, which isn't tied to any real day of work).
+function estimateCompletion(subject, st){
+  if(st.remainingPages === 0) return { done: true };
+  const baseline = subject.baseline || 0;
+  const trackedProgress = st.doneToDate - baseline;
+  const elapsedDays = st.studyThroughToday; // study days elapsed so far (pace is per study day)
+  if(trackedProgress <= 0 || elapsedDays <= 0) return null;
+  const pace = trackedProgress / elapsedDays;
+  if(pace <= 0) return null;
+  const studyDaysNeeded = Math.ceil(st.remainingPages / pace);
+  const d = addStudyDays(subject, viewDate(), studyDaysNeeded);
+  return { done: false, date: d, pace };
+}
+
+// For multi-round plans, projects (or looks up, for already-finished rounds) the date
+// each round (1회독, 2회독, ...) finishes, using the same actual-pace logic as estimateCompletion.
+function estimateRoundDates(subject, st){
+  const repeats = subjectRepeats(subject);
+  if(repeats <= 1) return [];
+  const baseline = subject.baseline || 0;
+  const trackedProgress = st.doneToDate - baseline;
+  const elapsedDays = st.studyThroughToday; // study days elapsed so far
+  const pace = (trackedProgress > 0 && elapsedDays > 0) ? trackedProgress / elapsedDays : 0;
+
+  const dayLog = logs[subject.id] || {};
+  const sortedDates = Object.keys(dayLog).sort();
+
+  const results = [];
+  for(let r = 1; r <= repeats; r++){
+    const target = r * subject.totalPages;
+    if(target <= st.doneToDate){
+      let running = baseline;
+      let doneDate = null;
+      for(const d of sortedDates){
+        running += Number(dayLog[d]) || 0;
+        if(running >= target){ doneDate = d; break; }
+      }
+      results.push({ round: r, done: true, date: doneDate ? toDate(doneDate) : null });
+    } else if(pace > 0){
+      const studyDaysNeeded = Math.ceil((target - st.doneToDate) / pace);
+      const d = addStudyDays(subject, viewDate(), studyDaysNeeded);
+      results.push({ round: r, done: false, date: d });
+    } else {
+      results.push({ round: r, done: false, date: null });
+    }
+  }
+  return results;
+}
+
+const STREAK_MILESTONES = [3, 7, 14, 21, 30, 50, 100];
+
+let celebrationShownForDate = null;
+
+function maybeCelebrateAllGoalsAchieved(){
+  if(!plan.subjects.length) return;
+  const todayStr = fmt(viewDate());
+  // Only subjects actually scheduled today (and not yet finished) count — rest days
+  // (weekends, or a weekday a subject isn't studied) must not block or trigger the celebration.
+  const activeToday = plan.subjects.filter(s => {
+    const st = subjectStats(s);
+    return st.isStudyToday && st.remainingPages > 0;
+  });
+  if(!activeToday.length) return;
+  const allAchieved = activeToday.every(s => {
+    const st = subjectStats(s);
+    const doneToday = Number((logs[s.id] || {})[todayStr]) || 0;
+    return st.todayGoal > 0 && doneToday >= st.todayGoal;
+  });
+  if(allAchieved && celebrationShownForDate !== todayStr){
+    celebrationShownForDate = todayStr;
+    triggerConfetti();
+    showToast('오늘 목표를 모두 해냈어요! 정말 대단해요 🎉');
+  }
+}
+
+function triggerConfetti(){
+  const colors = ['#E0483C', '#FFD54F', '#2F6F4F', '#3B6FA0', '#D98E3B'];
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  document.body.appendChild(container);
+  for(let i = 0; i < 60; i++){
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = (Math.random() * 100) + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = (Math.random() * 0.5) + 's';
+    piece.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+    piece.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+    container.appendChild(piece);
+  }
+  setTimeout(() => container.remove(), 3800);
+}
+
+function renderSummaryStats(){
+  const streak = computeStreak();
+  const inactivityStreak = computeInactivityStreak();
+  const planEnd = toDate(plan.endDate);
+  const todayStr = fmt(viewDate());
+  const yesterday = new Date(viewDate()); yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const yesterdayStr = fmt(yesterday);
+
+  // Inactivity warning — shown when nothing has been logged for 2+ days in a row.
+  const warningHtml = inactivityStreak >= 2
+    ? `<div class="summary-warning">⚠️ ${inactivityStreak}일째 기록이 없어요. 지금 조금이라도 시작해보세요!</div>`
+    : '';
+
+  // Streak milestone callout — a bigger moment when hitting a round number.
+  const isMilestone = streak > 0 && STREAK_MILESTONES.includes(streak);
+  const streakHtml = isMilestone
+    ? `<div class="summary-streak summary-streak-milestone">
+        <span class="summary-streak-num">${streak}</span>일 연속 돌파! 🔥🎉
+       </div>`
+    : `<div class="summary-streak">
+        <span class="summary-streak-num">${streak}</span>일 연속 기록 중${streak > 0 ? ' 🔥' : ''}
+       </div>`;
+
+  // Cumulative total pages across all subjects.
+  const totalReadAllTime = plan.subjects.reduce((sum, s) => sum + subjectStats(s).doneToDate, 0);
+
+  // Today vs yesterday.
+  const todayTotal = plan.subjects.reduce((sum, s) => sum + (Number((logs[s.id] || {})[todayStr]) || 0), 0);
+  const yesterdayTotal = plan.subjects.reduce((sum, s) => sum + (Number((logs[s.id] || {})[yesterdayStr]) || 0), 0);
+  const dayDiff = todayTotal - yesterdayTotal;
+  let compareHtml;
+  if(todayTotal === 0 && yesterdayTotal === 0){
+    compareHtml = `<div class="summary-compare">어제와 오늘 아직 기록이 없어요.</div>`;
+  } else if(dayDiff > 0){
+    compareHtml = `<div class="summary-compare summary-compare-up">어제보다 ${dayDiff}페이지 더 했어요 📈</div>`;
+  } else if(dayDiff < 0){
+    compareHtml = `<div class="summary-compare summary-compare-down">어제보다 ${Math.abs(dayDiff)}페이지 덜 했어요 📉</div>`;
+  } else {
+    compareHtml = `<div class="summary-compare">어제와 똑같은 페이스예요.</div>`;
+  }
+
+  const totalsHtml = `
+    <div class="summary-totals">
+      <div class="summary-total-pages">지금까지 총 <b>${Math.round(totalReadAllTime)}</b>페이지 읽었어요</div>
+      ${compareHtml}
+    </div>`;
+
+  const etaRows = plan.subjects.map(s => {
+    const st = subjectStats(s);
+    const est = estimateCompletion(s, st);
+    const roundDates = estimateRoundDates(s, st);
+    const roundText = roundDates.length
+      ? ` (${roundDates.map(rd => {
+          if(rd.done) return `${rd.round}회독 ${rd.date ? koreanDateLabel(rd.date) : '완료'}`;
+          return rd.date ? `${rd.round}회독 ${koreanDateLabel(rd.date)}` : `${rd.round}회독 계산 중`;
+        }).join(' · ')})`
+      : '';
+    let text;
+    if(est && est.done){
+      text = `${s.name}: 완료 🎉${roundText}`;
+    } else if(!est){
+      text = `${s.name}: 예상 완료일 계산 중 (기록이 더 필요해요)`;
+    } else {
+      const estLabel = koreanDateLabel(est.date);
+      const diffFromPlan = diffDays(planEnd, est.date);
+      const compareText = diffFromPlan <= 0
+        ? `계획(${koreanDateLabel(planEnd)})보다 ${Math.abs(diffFromPlan)}일 빠름`
+        : `계획(${koreanDateLabel(planEnd)})보다 ${diffFromPlan}일 늦음`;
+      const cls = diffFromPlan <= 0 ? 'summary-eta-good' : 'summary-eta-bad';
+      text = `${s.name}: <b>${estLabel}</b> 예상 · <span class="${cls}">${compareText}</span>${roundText}`;
+    }
+    return `<div class="summary-eta-row">${text}</div>`;
+  }).join('');
+
+  $('summaryStats').innerHTML = warningHtml + streakHtml + totalsHtml + `<div class="summary-eta-list">${etaRows}</div>`;
+
+  renderCalendar(); // every log/plan change already re-renders this summary, so the calendar stays in sync
+
+  maybeCelebrateAllGoalsAchieved();
+}
+
+function renderSubjectEditList(){
+  $('subjectEditList').innerHTML = plan.subjects.map(s => {
+    const baseline = s.baseline || 0;
+    let existingValue = '';
+    let existingRound = '';
+    if(baseline > 0){
+      const pos = bookPosition(baseline, s.totalPages);
+      existingValue = pos.page;
+      existingRound = pos.round;
+    }
+    const activeDays = subjectStudyDays(s);
+    const altDays = subjectAltDays(s);
+    // 월~일 순서로 표시 (getUTCDay 기준: 일=0)
+    const chipsFor = (list) => [1, 2, 3, 4, 5, 6, 0].map(d =>
+      `<button type="button" class="ser-day ${list && list.includes(d) ? 'on' : ''}" data-day="${d}">${KOREAN_WEEKDAYS[d]}</button>`
+    ).join('');
+    const dayChips = chipsFor(activeDays);
+    const altChips = chipsFor(altDays);
+    return `
+      <div class="subject-edit-block">
+        <div class="ser-line">
+          <input type="text" class="ser-name-input" data-subject-id="${s.id}" value="${s.name}">
+          <label class="ser-f">전체<input type="number" class="ser-pages" data-subject-id="${s.id}" min="1" value="${s.totalPages}"></label>
+          <label class="ser-f">목표회독<input type="number" class="ser-repeats ser-narrow" data-subject-id="${s.id}" min="1" value="${subjectRepeats(s)}"></label>
+          <label class="ser-f">현재<input type="number" class="ser-existing-round ser-narrow" data-subject-id="${s.id}" min="1" placeholder="1" value="${existingRound}">회독</label>
+          <label class="ser-f"><input type="number" class="ser-existing" data-subject-id="${s.id}" min="0" placeholder="0" value="${existingValue}">p</label>
+          <button type="button" class="ser-delete danger-text" data-subject-id="${s.id}">삭제</button>
+        </div>
+        <div class="ser-days-line">
+        <div class="ser-days ser-days-main" data-subject-id="${s.id}">
+          <span class="ser-days-label">공부 요일</span>${dayChips}
+          <button type="button" class="ser-alt-toggle ${altDays ? 'on' : ''}" data-subject-id="${s.id}" title="격주로 요일을 번갈아 써요">격주 교대</button>
+        </div>
+        <div class="ser-days ser-days-alt ${altDays ? '' : 'hidden'}" data-subject-id="${s.id}">
+          <span class="ser-days-label">다음 주</span>${altChips}
+        </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+let deleteArmedSubjectId = null;
+let deleteArmTimer = null;
+$('subjectEditList').addEventListener('click', async (e) => {
+  const dayBtn = e.target.closest('.ser-day');
+  if(dayBtn){ dayBtn.classList.toggle('on'); return; } // saved when "적용" is pressed
+  const altToggle = e.target.closest('.ser-alt-toggle');
+  if(altToggle){
+    const sid = altToggle.dataset.subjectId;
+    const altRow = document.querySelector(`.ser-days-alt[data-subject-id="${sid}"]`);
+    const turnOn = altRow.classList.contains('hidden');
+    altRow.classList.toggle('hidden', !turnOn);
+    altToggle.classList.toggle('on', turnOn);
+    if(turnOn && !altRow.querySelector('.ser-day.on')){
+      // 처음 켜면 첫 주에 안 쓰는 평일을 미리 채워줌 (월수금 -> 화목)
+      const mainOn = [...document.querySelectorAll(`.ser-days-main[data-subject-id="${sid}"] .ser-day.on`)].map(c => c.dataset.day);
+      altRow.querySelectorAll('.ser-day').forEach(c => {
+        const d = parseInt(c.dataset.day, 10);
+        if(d >= 1 && d <= 5 && !mainOn.includes(String(d))) c.classList.add('on');
+      });
+    }
+    return;
+  }
+  const delBtn = e.target.closest('.ser-delete');
+  if(!delBtn) return;
+  const subjectId = delBtn.dataset.subjectId;
+
+  if(deleteArmedSubjectId !== subjectId){
+    deleteArmedSubjectId = subjectId;
+    delBtn.textContent = '정말요?';
+    showToast('한 번 더 누르면 이 과목이 삭제돼요.');
+    clearTimeout(deleteArmTimer);
+    deleteArmTimer = setTimeout(() => { deleteArmedSubjectId = null; renderSubjectEditList(); }, 4000);
+    return;
+  }
+
+  clearTimeout(deleteArmTimer);
+  deleteArmedSubjectId = null;
+
+  if(plan.subjects.length <= 1){
+    showToast('과목은 최소 1개 있어야 해요.');
+    renderSubjectEditList();
+    return;
+  }
+  plan.subjects = plan.subjects.filter(s => s.id !== subjectId);
+  delete logs[subjectId];
+  await savePlan();
+  await saveLogs();
+  showToast('과목을 삭제했어요.');
+  renderSubjectEditList();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderAllGoals();
+  renderReviewChecklist();
+  renderReviewFullGrid();
+  renderSummaryStats();
+});
+
+$('addTabBtn').onclick = () => {
+  $('addSubjectInline').classList.remove('hidden');
+  $('newSubjectName').value = '';
+  $('newSubjectName').focus();
+};
+
+$('cancelAddSubjectBtn').onclick = () => {
+  $('addSubjectInline').classList.add('hidden');
+};
+
+async function addSubjectInline(){
+  const name = cleanName($('newSubjectName').value);
+  if(!name) return;
+  if(plan.subjects.some(s => s.name === name)){
+    alert('이미 같은 이름의 과목이 있어요.');
+    return;
+  }
+  const newSubject = { id: 's_' + Math.random().toString(36).slice(2,9), name, totalPages: 1, repeats: 1, studyDays: WEEKDAYS_MON_FRI.slice(), studyDaysAlt: null };
+  plan.subjects.push(newSubject);
+  logs[newSubject.id] = {};
+  await savePlan();
+  await saveLogs();
+  $('addSubjectInline').classList.add('hidden');
+  renderSubjectEditList();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderAllGoals();
+}
+
+$('confirmAddSubjectBtn').onclick = addSubjectInline;
+$('newSubjectName').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){ e.preventDefault(); addSubjectInline(); }
+});
+
+function statusMessage(st, subjectName){
+  const pages = Math.round(Math.abs(st.pageDelta));
+  const days = Math.abs(st.dayDelta);
+  if(st.remainingPages === 0){
+    return { cls: 'status-ahead', text: `${subjectName}, 목표 페이지를 모두 마쳤어요.`, subText: '정말 잘했어요.' };
+  }
+  if(st.pageDelta >= 1){
+    return { cls: 'status-ahead', text: `계획보다 ${pages}페이지 앞서 있어요.`, subText: '이 흐름이면 기한 전에 끝나겠어요.' };
+  }
+  if(st.pageDelta <= -1){
+    return { cls: 'status-behind', text: `계획보다 ${pages}페이지, 약 ${days.toFixed(1)}일 뒤처졌어요.`, subText: '오늘 목표에 조금만 더 얹어볼까요?' };
+  }
+  return { cls: 'status-ontrack', text: '계획한 속도에 정확히 맞춰 가고 있어요.', subText: '' };
+}
+
+function renderAllGoals(){
+  $('todayDateLabel').textContent = koreanDateLabel(viewDate()) + (viewDate().getTime() === todayUTC().getTime() ? ' (오늘)' : ' (선택한 날짜)');
+
+  const start = toDate(plan.startDate);
+  const end = toDate(plan.endDate);
+  const totalDays = diffDays(start, end) + 1;
+  const today = viewDate();
+  let dayCountText;
+  if(today < start){
+    dayCountText = `시작 D-${diffDays(today, start)}`;
+  } else {
+    const dayNumber = Math.min(diffDays(start, today) + 1, totalDays);
+    // Weekday (월~금) counter, matching how progress is now paced.
+    const wk = { studyDays: WEEKDAYS_MON_FRI };
+    const wkTotal = countStudyDays(wk, start, end);
+    const wkDone = countStudyDays(wk, start, today > end ? end : today);
+    dayCountText = `시작일부터 ${dayNumber}일째 / 총 ${totalDays}일 · 평일 ${wkDone}/${wkTotal}`;
+  }
+  $('dayCountLabel').textContent = dayCountText;
+
+  $('allGoalsList').innerHTML = plan.subjects.map(subject => {
+    const repeats = subjectRepeats(subject);
+    const st = subjectStats(subject);
+    const repeatNote = repeats > 1 ? ` (${subject.totalPages}p × ${repeats}회독)` : '';
+    const todayStr = fmt(viewDate());
+    const doneToday = Number((logs[subject.id] || {})[todayStr]) || 0;
+    const achieved = st.remainingPages === 0 || (st.todayGoal > 0 && doneToday >= st.todayGoal);
+
+    let goalNum, goalRange, goalLabel;
+    if(st.remainingPages === 0){
+      goalNum = '0'; goalRange = ''; goalLabel = `${subject.name} 완료`;
+    } else if(st.todayGoal === 0){
+      goalNum = '0'; goalRange = '';
+      goalLabel = st.isStudyToday
+        ? `${subject.name} · 오늘은 쉬어가는 날이에요`
+        : `${subject.name} · 오늘은 쉬는 요일이에요 (진행: ${studyDaysLabel(subject)})`;
+    } else {
+      goalNum = st.todayGoal;
+      goalRange = todayGoalRangeText(subject, st);
+      goalLabel = `${subject.name} · 남은 ${st.remainingPages}페이지${repeatNote} · 진행 요일 ${studyDaysLabel(subject)}`;
+    }
+    const status = statusMessage(st, subject.name);
+    const currentRoundPos = st.doneToDate > 0 ? bookPosition(st.doneToDate, subject.totalPages) : null;
+    const currentPageDisplay = currentRoundPos ? `${currentRoundPos.page}p` : '0p';
+    // Use the SAME adaptive target as the "1회독 71p ~ 78p" range below, not the flat
+    // original-plan pace — otherwise the two "목표" numbers on this card disagree.
+    const todayTargetForDisplay = st.remainingPages === 0 ? st.target : st.todayTargetCumulative;
+    const idealPos = todayTargetForDisplay > 0 ? bookPosition(todayTargetForDisplay, subject.totalPages) : null;
+    const idealPageDisplay = idealPos ? `${idealPos.page}p` : '0p';
+    const achieveRatio = todayTargetForDisplay > 0 ? (st.doneToDate / todayTargetForDisplay) * 100 : (st.doneToDate > 0 ? 100 : 0);
+    const todayAchievedPct = st.remainingPages === 0 ? 100 : (st.todayGoal > 0 ? Math.min(100, (doneToday / st.todayGoal) * 100) : 0);
+    const todayAchievedPctDisplay = st.todayGoal > 0 ? Math.round((doneToday / st.todayGoal) * 100) : (st.remainingPages === 0 ? 100 : 0);
+
+    const todayStr2 = fmt(viewDate());
+    const todayEntryDelta = (logs[subject.id] || {})[todayStr2];
+    const miniLogHtml = (todayEntryDelta !== undefined && todayEntryDelta > 0) ? (() => {
+      const date = todayStr2;
+      const delta = todayEntryDelta;
+      const cumulativeAt = cumulativeBefore(subject.id, date) + (Number(delta) || 0);
+      const pos = cumulativeAt > 0 ? bookPosition(cumulativeAt, subject.totalPages) : null;
+      const reachedLabel = pos ? `${repeats > 1 ? pos.round + '회독 ' : ''}${pos.page}p까지` : '기록 없음';
+      return `<div class="log-item"><span class="d">${date}</span><span>${reachedLabel} <span style="color:var(--ink-soft);">(+${delta}p)</span></span>
+        <span class="log-item-actions">
+          <button type="button" class="link-btn mini-log-edit" data-subject-id="${subject.id}" data-date="${date}" data-page="${pos ? pos.page : ''}">수정</button>
+          <button type="button" class="danger-text mini-log-delete" data-subject-id="${subject.id}" data-date="${date}">삭제</button>
+        </span></div>`;
+    })() : `<div style="color:var(--ink-soft); font-size:12px; padding:4px 2px;">오늘 기록이 아직 없어요.</div>`;
+
+    const pastEntries = Object.entries(logs[subject.id] || {})
+      .filter(([date]) => date !== todayStr2)
+      .sort((a,b) => b[0].localeCompare(a[0]));
+    const pastLogHtml = pastEntries.length ? pastEntries.map(([date, delta]) => {
+      const cumulativeAt = cumulativeBefore(subject.id, date) + (Number(delta) || 0);
+      const pos = cumulativeAt > 0 ? bookPosition(cumulativeAt, subject.totalPages) : null;
+      const reachedLabel = pos ? `${repeats > 1 ? pos.round + '회독 ' : ''}${pos.page}p까지` : '기록 없음';
+      return `<div class="log-item"><span class="d">${date}</span><span>${reachedLabel} <span style="color:var(--ink-soft);">(+${delta}p)</span></span>
+        <span class="log-item-actions">
+          <button type="button" class="link-btn mini-log-edit" data-subject-id="${subject.id}" data-date="${date}" data-page="${pos ? pos.page : ''}">수정</button>
+          <button type="button" class="danger-text mini-log-delete" data-subject-id="${subject.id}" data-date="${date}">삭제</button>
+        </span></div>`;
+    }).join('') : `<div style="color:var(--ink-soft); font-size:12px; padding:4px 2px;">지난 기록이 없어요.</div>`;
+
+    return `
+      <div class="subject-progress-block ${achieved ? 'goal-achieved' : ''}">
+        ${achieved ? '<div class="goal-achieved-badge">✓ 오늘 목표 달성!</div>' : ''}
+        <div class="spb-name-row">
+          <span class="spb-name">${subject.name}</span>
+          <span class="spb-current-page"><span class="spb-page-label">현재</span> ${currentPageDisplay} <span class="spb-page-label">목표</span> ${idealPageDisplay}<span class="spb-achieve-rate">(${achieveRatio.toFixed(0)}%)</span></span>
+        </div>
+        <div class="goal-header">
+          <div class="goal-header-text">
+            <div class="goal-num mono" style="font-size:36px;">${goalNum}<span style="font-size:16px; font-weight:500;">p</span></div>
+            <div class="goal-range" style="font-size:20px;">${goalRange}</div>
+          </div>
+          <div class="goal-pct-ring" style="--pct:${todayAchievedPct};" title="오늘 목표 달성률">
+            <span>${todayAchievedPctDisplay}%</span>
+          </div>
+        </div>
+        <div class="goal-label">${goalLabel}</div>
+        <div class="status-line ${status.cls}">${status.text}${status.subText ? `<br><span class="status-subtext">${status.subText}</span>` : ''}</div>
+        <div class="log-form-inline">
+          <input type="number" class="reach-input" data-subject-id="${subject.id}" min="1" max="${subject.totalPages}" placeholder="도달 페이지">
+          <button type="button" class="save-reach-btn" data-subject-id="${subject.id}">기록</button>
+        </div>
+        <div class="mini-log-list">${miniLogHtml}</div>
+        ${pastEntries.length ? `
+          <button type="button" class="link-btn past-log-toggle" style="margin-top:8px;">지난 기록 보기 (${pastEntries.length})</button>
+          <div class="mini-log-list past-log-list hidden">${pastLogHtml}</div>
+        ` : ''}
+      </div>`;
+  }).join('');
+}
+
+// ---------- 공부 달력 (daily achievement calendar) ----------
+let calYear = null, calMonth = null; // calMonth is 0-indexed
+let calSelected = null;              // 'YYYY-MM-DD'
+
+// The goal a subject had on a given date, computed exactly like the live "오늘의 목표" card:
+// remaining pages (after everything logged BEFORE that date) spread over the study days left.
+// Returns null when the subject wasn't scheduled that day.
+function dayStatsFor(subject, date){
+  const start = toDate(plan.startDate), end = toDate(plan.endDate);
+  if(date < start || date > end || !isStudyDay(subject, date)) return null;
+  const dStr = fmt(date);
+  const target = subjectTarget(subject);
+  const prev = cumulativeBefore(subject.id, dStr);
+  const remainingBefore = Math.max(target - prev, 0);
+  const dayBefore = new Date(date); dayBefore.setUTCDate(dayBefore.getUTCDate() - 1);
+  const studyTotal = Math.max(countStudyDays(subject, start, end), 1);
+  const studyLeft = Math.max(studyTotal - countStudyDays(subject, start, dayBefore), 1);
+  const goal = remainingBefore > 0 ? Math.ceil(remainingBefore / studyLeft) : 0;
+  return { goal, prev };
+}
+
+// Earliest date with any logged pages (null if nothing was ever logged). Days before it are
+// shown as "기록 전" instead of "미달성", since nothing was being tracked yet.
+function firstLogDateStr(){
+  let min = null;
+  for(const s of plan.subjects){
+    for(const [d, p] of Object.entries(logs[s.id] || {})){
+      if((Number(p) || 0) > 0 && (min === null || d < min)) min = d;
+    }
+  }
+  return min;
+}
+
+function calendarDayInfo(date, firstLog){
+  if(firstLog === undefined) firstLog = firstLogDateStr();
+  const dStr = fmt(date);
+  const start = toDate(plan.startDate), end = toDate(plan.endDate);
+  const today = todayUTC();
+  const inPlan = date >= start && date <= end;
+  const rows = plan.subjects.map(s => {
+    const ds = inPlan ? dayStatsFor(s, date) : null;
+    const done = Number((logs[s.id] || {})[dStr]) || 0;
+    return { s, scheduled: !!ds, goal: ds ? ds.goal : 0, prev: ds ? ds.prev : cumulativeBefore(s.id, dStr), done };
+  });
+  const totalDone = rows.reduce((a, r) => a + r.done, 0);
+  const due = rows.filter(r => r.scheduled && r.goal > 0);
+  const isToday = date.getTime() === today.getTime();
+  let status;
+  if(!inPlan) status = 'out';
+  else if(date > today) status = 'future';
+  else if(!rows.some(r => r.scheduled)) status = 'rest';
+  else if(!isToday && (firstLog === null || dStr < firstLog)) status = 'pre'; // before tracking began
+  else if(due.length === 0) status = 'achieved'; // everything scheduled was already finished
+  else if(due.every(r => r.done >= r.goal)) status = 'achieved';
+  else if(isToday) status = 'today';             // today isn't over yet
+  else status = due.some(r => r.done > 0) ? 'partial' : 'missed';
+  return { dStr, rows, due, totalDone, status, isToday };
+}
+
+// Short label for a subject on the calendar: 사회보험법 -> 사회보험, 경영학원론 -> 경영학.
+function calShortName(name){
+  return String(name).replace(/원론$/, '').replace(/^(.{3,})법$/, '$1');
+}
+
+// One coloured line per subject: green = reached today's goal, amber = partly, red = missed,
+// grey = still to do / nothing tracked yet.
+function calChipHtml(r, info){
+  const tracked = ['achieved', 'partial', 'missed', 'today'].includes(info.status);
+  let cls, num = '';
+  if(!r.scheduled){ cls = 'bonus'; num = `+${r.done}p`; }               // studied on a day it wasn't scheduled
+  else if(!tracked){ cls = 'pending'; }                                  // future / before tracking began
+  else if(r.goal === 0){ cls = 'ok'; num = '완료'; }
+  else if(r.done >= r.goal){ cls = 'ok'; num = `${r.done}/${r.goal}`; }
+  else if(r.done > 0){ cls = 'part'; num = `${r.done}/${r.goal}`; }
+  else { cls = info.isToday ? 'pending' : 'miss'; num = `0/${r.goal}`; }
+  const name = r.s.name;
+  return `<div class="cal-chip cal-chip-${cls}" title="${name}"><span class="nm-full">${calShortName(name)}</span><span class="nm-short">${name.charAt(0)}</span><span class="cal-chip-n">${num}</span></div>`;
+}
+
+function renderCalendar(){
+  const grid = $('calendarGrid');
+  if(!grid || !plan) return;
+  const today = todayUTC();
+  if(calYear === null){ calYear = today.getUTCFullYear(); calMonth = today.getUTCMonth(); }
+  $('calTitle').textContent = `${calYear}년 ${calMonth + 1}월`;
+
+  const first = new Date(Date.UTC(calYear, calMonth, 1));
+  const daysInMonth = new Date(Date.UTC(calYear, calMonth + 1, 0)).getUTCDate();
+  const monthPrefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  if(calSelected && !calSelected.startsWith(monthPrefix)) calSelected = null;
+  if(!calSelected && fmt(today).startsWith(monthPrefix)) calSelected = fmt(today);
+
+  const ICONS = { achieved: '✓', partial: '△', missed: '✕', today: '●' };
+  const counts = { achieved: 0, partial: 0, missed: 0 };
+  const cells = [];
+  const firstLog = firstLogDateStr();
+  for(let i = 0; i < first.getUTCDay(); i++) cells.push('<div class="cal-cell cal-blank"></div>');
+
+  for(let day = 1; day <= daysInMonth; day++){
+    const date = new Date(Date.UTC(calYear, calMonth, day));
+    const info = calendarDayInfo(date, firstLog);
+    if(counts[info.status] !== undefined) counts[info.status]++;
+
+    const chips = info.rows.filter(r => r.scheduled || r.done > 0).map(r => calChipHtml(r, info)).join('');
+    const title = `${md(info.dStr)}` + info.rows
+      .filter(r => r.scheduled || r.done > 0)
+      .map(r => ` · ${r.s.name} ${r.done}p${r.goal ? '/' + r.goal + 'p' : ''}`).join('');
+
+    const cls = ['cal-cell', `cal-${info.status}`];
+    if(info.isToday) cls.push('cal-today');
+    if(calSelected === info.dStr) cls.push('cal-selected');
+    cells.push(`
+      <div class="${cls.join(' ')}" data-date="${info.dStr}" title="${title}">
+        <div class="cal-top"><span>${day}</span><span class="cal-icon">${ICONS[info.status] || ''}</span></div>
+        <div class="cal-chips">${chips}</div>
+      </div>`);
+  }
+  grid.innerHTML = cells.join('');
+
+  $('calMonthSummary').innerHTML = `
+    <span class="cal-badge" style="background:var(--progress-soft); color:var(--progress);">✓ 달성 ${counts.achieved}일</span>
+    <span class="cal-badge" style="background:var(--goal-soft); color:#8A5A00;">△ 일부 ${counts.partial}일</span>
+    <span class="cal-badge" style="background:var(--behind-soft); color:var(--behind);">✕ 미달성 ${counts.missed}일</span>`;
+
+  renderCalendarDetail();
+}
+
+function renderCalendarDetail(){
+  const box = $('calDayDetail');
+  if(!box) return;
+  if(!calSelected){ box.innerHTML = `<div style="color:var(--ink-soft);">날짜를 누르면 그날의 과목별 진도가 보여요.</div>`; return; }
+  const date = toDate(calSelected);
+  const info = calendarDayInfo(date);
+  const STATUS_TEXT = {
+    achieved: '<span class="cal-ok">✓ 목표 달성</span>', partial: '<span style="color:#B26A00; font-weight:600;">△ 일부 달성</span>',
+    missed: '<span class="cal-no">✕ 미달성</span>', today: '<b>● 오늘 진행 중</b>',
+    future: '<span style="color:var(--ink-soft);">예정</span>', rest: '<span style="color:var(--ink-soft);">쉬는 날</span>',
+    pre: '<span style="color:var(--ink-soft);">기록 시작 전</span>',
+    out: '<span style="color:var(--ink-soft);">공부 기간 밖</span>'
+  };
+  const lines = info.rows.filter(r => r.scheduled || r.done > 0).map(r => {
+    let reached = '';
+    if(r.done > 0){
+      const pos = bookPosition(r.prev + r.done, r.s.totalPages);
+      reached = ` · ${subjectRepeats(r.s) > 1 ? pos.round + '회독 ' : ''}${pos.page}p까지`;
+    }
+    const ok = r.goal === 0 ? '' : (r.done >= r.goal ? ' <span class="cal-ok">✓</span>' : (info.status === 'future' || info.status === 'today' ? '' : ' <span class="cal-no">✕</span>'));
+    const goalText = r.scheduled ? (r.goal > 0 ? `목표 ${r.goal}p` : '이미 완료') : '쉬는 요일';
+    return `<div class="cal-detail-row"><span>${r.s.name}</span><span>실적 <b>${r.done}p</b> / ${goalText}${reached}${ok}</span></div>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="cal-detail-box">
+      <div class="cal-detail-title">${date.getUTCMonth() + 1}월 ${date.getUTCDate()}일 (${KOREAN_WEEKDAYS[date.getUTCDay()]}) · ${STATUS_TEXT[info.status] || ''}</div>
+      ${lines || `<div style="color:var(--ink-soft);">이 날은 예정된 과목이 없어요.</div>`}
+    </div>`;
+}
+
+$('calendarGrid').addEventListener('click', (e) => {
+  const cell = e.target.closest('.cal-cell[data-date]');
+  if(!cell) return;
+  calSelected = cell.dataset.date;
+  renderCalendar();
+});
+function shiftCalendarMonth(delta){
+  const d = new Date(Date.UTC(calYear, calMonth + delta, 1));
+  calYear = d.getUTCFullYear(); calMonth = d.getUTCMonth(); calSelected = null;
+  renderCalendar();
+}
+$('calPrevBtn').onclick = () => shiftCalendarMonth(-1);
+$('calNextBtn').onclick = () => shiftCalendarMonth(1);
+$('calTodayBtn').onclick = () => { calYear = null; calMonth = null; calSelected = null; renderCalendar(); };
+
+// ---------- view switch (진도율 / 복습 체크리스트) ----------
+$('viewProgressBtn').onclick = () => {
+  $('viewProgressBtn').classList.add('active');
+  $('viewReviewBtn').classList.remove('active');
+  $('progressTabContent').classList.remove('hidden');
+  $('reviewTabContent').classList.add('hidden');
+};
+$('viewReviewBtn').onclick = () => {
+  $('viewReviewBtn').classList.add('active');
+  $('viewProgressBtn').classList.remove('active');
+  $('reviewTabContent').classList.remove('hidden');
+  $('progressTabContent').classList.add('hidden');
+  renderReviewChecklist();
+  renderReviewFullGrid();
+  renderSummaryStats();
+};
+
+// ---------- 1-4-7-14 복습 체크리스트 ----------
+const REVIEW_OFFSETS = [1, 4, 7, 14];
+
+// Computes the page range a subject was SCHEDULED to cover on a given date,
+// based on the original flat daily plan (target / totalDays) — independent of
+// whether the person actually studied that day or not.
+function plannedRangeForDate(subject, date){
+  // 그날 '실제로 기록한' 분량만 복습 대상으로 삼아요 (계획이 아니라 실제 공부한 양).
+  const dStr = fmt(date);
+  const done = Number((logs[subject.id] || {})[dStr]) || 0;
+  if(done <= 0) return null;                       // 그날 기록이 없으면 복습할 것도 없음
+  const prev = cumulativeBefore(subject.id, dStr);  // 그날 이전까지 읽은 누적(기존 진행 포함)
+  const startPos = bookPosition(prev + 1, subject.totalPages);
+  const endPos = bookPosition(prev + done, subject.totalPages);
+  return { startPos, endPos };
+}
+
+function renderReviewChecklist(){
+  const today = viewDate();
+  const todayStr = fmt(today);
+  $('reviewDateLabel').textContent = koreanDateLabel(today);
+
+  $('reviewChecklist').innerHTML = REVIEW_OFFSETS.map(offset => {
+    const sourceDate = new Date(today); sourceDate.setUTCDate(sourceDate.getUTCDate() - offset);
+    const sourceLabel = koreanDateLabel(sourceDate);
+
+    const items = plan.subjects
+      .map(s => ({ s, range: plannedRangeForDate(s, sourceDate) }))
+      .filter(x => x.range !== null);
+
+    const itemsHtml = items.length ? items.map(({ s, range }) => {
+      const repeats = subjectRepeats(s);
+      const roundTag = (r) => repeats > 1 ? `${r}회독 ` : '';
+      let pageLabel;
+      if(range.startPos.round === range.endPos.round){
+        pageLabel = `${roundTag(range.startPos.round)}${range.startPos.page}p ~ ${range.endPos.page}p`;
+      } else {
+        pageLabel = `${roundTag(range.startPos.round)}${range.startPos.page}p ~ ${s.totalPages}p 이어서 ${roundTag(range.endPos.round)}1p ~ ${range.endPos.page}p`;
+      }
+      const key = `${todayStr}_${offset}_${s.id}`;
+      const checked = !!reviewChecks[key];
+      return `
+        <div class="review-item ${checked ? 'checked' : ''}">
+          <input type="checkbox" id="rc_${key}" data-key="${key}" ${checked ? 'checked' : ''}>
+          <label for="rc_${key}">${s.name} — ${pageLabel}</label>
+        </div>`;
+    }).join('') : `<div class="review-empty">그날은 공부 기록이 없어요.</div>`;
+
+    return `
+      <div>
+        <div class="review-group-title">${offset}일 전 <span class="rd">(${sourceLabel})</span></div>
+        ${itemsHtml}
+      </div>`;
+  }).join('');
+
+  [...document.querySelectorAll('#reviewChecklist input[type=checkbox]')].forEach(cb => {
+    cb.onchange = async () => {
+      const key = cb.dataset.key;
+      reviewChecks[key] = cb.checked;
+      await saveReviewChecks();
+      renderReviewChecklist();
+      renderReviewFullGrid();
+      renderSummaryStats();
+    };
+  });
+}
+
+function renderReviewFullGrid(){
+  renderReviewFullGridInner();
+  renderReviewCalendar();
+}
+function renderReviewFullGridInner(){
+  const start = toDate(plan.startDate);
+  const realToday = todayUTC();
+  const sel = viewDate();
+  const today = sel > realToday ? sel : realToday;
+  const totalDays = diffDays(start, today) + 1;
+  if(totalDays <= 0){
+    $('reviewFullGrid').innerHTML = '';
+    $('reviewOverallRate').innerHTML = '';
+    $('reviewMonthlyRate').innerHTML = '';
+    return;
+  }
+
+  let totalChecked = 0, totalApplicable = 0;
+  const monthTotals = {}; // "2026-08" -> { checked, applicable }
+  const rows = [];
+
+  for(let i = 0; i < totalDays; i++){
+    const d = new Date(start); d.setUTCDate(d.getUTCDate() + i);
+    const dStr = fmt(d);
+    const monthKey = dStr.slice(0, 7);
+    if(!monthTotals[monthKey]) monthTotals[monthKey] = { checked: 0, applicable: 0 };
+
+    const cells = REVIEW_OFFSETS.map(offset => {
+      const sourceDate = new Date(d); sourceDate.setUTCDate(sourceDate.getUTCDate() - offset);
+      const applicable = plan.subjects.filter(s => plannedRangeForDate(s, sourceDate) !== null);
+      if(applicable.length === 0) return '<td><div class="rg-cell rg-na" title="해당 없음"></div></td>';
+      const checkedCount = applicable.filter(s => reviewChecks[`${dStr}_${offset}_${s.id}`]).length;
+      totalChecked += checkedCount;
+      totalApplicable += applicable.length;
+      monthTotals[monthKey].checked += checkedCount;
+      monthTotals[monthKey].applicable += applicable.length;
+      const cls = checkedCount === 0 ? 'rg-empty' : (checkedCount === applicable.length ? 'rg-full' : 'rg-partial');
+      return `<td><div class="rg-cell ${cls}" title="${dStr} · ${offset}일 전 (${checkedCount}/${applicable.length})"></div></td>`;
+    }).join('');
+
+    const isToday = dStr === fmt(realToday);
+    rows.push(`<tr class="${isToday ? 'review-row-today' : ''}"><td>${md(dStr)}${isToday ? ' (오늘)' : ''}</td>${cells}</tr>`);
+  }
+
+  // Most recent date first, since that's what people check back on most.
+  $('reviewFullGrid').innerHTML = rows.reverse().join('');
+
+  const overallPct = totalApplicable > 0 ? Math.round((totalChecked / totalApplicable) * 100) : 0;
+  $('reviewOverallRate').innerHTML = `전체 복습 달성률: <b>${overallPct}%</b> (${totalChecked} / ${totalApplicable})`;
+
+  const monthKeys = Object.keys(monthTotals).sort().reverse();
+  $('reviewMonthlyRate').innerHTML = monthKeys.map(mk => {
+    const t = monthTotals[mk];
+    const pct = t.applicable > 0 ? Math.round((t.checked / t.applicable) * 100) : 0;
+    const [y, m] = mk.split('-');
+    return `<span class="review-month-badge">${parseInt(m)}월 <b>${pct}%</b> (${t.checked}/${t.applicable})</span>`;
+  }).join('');
+}
+
+
+// ---------- 복습 달력 (날짜별 복습 진도율) ----------
+let rcYear = null, rcMonth = null, rcSelected = null;
+
+// 어떤 날짜에 해야 할 복습(1·4·7·14일 전에 실제로 공부한 분량)과, 그중 체크한 개수
+function reviewDayInfo(date){
+  const dStr = fmt(date);
+  const realToday = todayUTC();
+  let total = 0, checked = 0;
+  const groups = REVIEW_OFFSETS.map(offset => {
+    const src = new Date(date); src.setUTCDate(src.getUTCDate() - offset);
+    const items = plan.subjects
+      .map(s => ({ s, range: plannedRangeForDate(s, src) }))
+      .filter(x => x.range !== null)
+      .map(x => ({ ...x, done: !!reviewChecks[`${dStr}_${offset}_${x.s.id}`] }));
+    total += items.length;
+    checked += items.filter(i => i.done).length;
+    return { offset, src, items };
+  });
+  const isToday = date.getTime() === realToday.getTime();
+  let status;
+  if(total === 0) status = 'rest';
+  else if(date > realToday) status = 'future';
+  else if(checked === total) status = 'achieved';
+  else if(isToday) status = 'today';
+  else status = checked > 0 ? 'partial' : 'missed';
+  return { dStr, total, checked, groups, status, isToday };
+}
+
+function renderReviewCalendar(){
+  const grid = $('rcGrid');
+  if(!grid || !plan) return;
+  const realToday = todayUTC();
+  if(rcYear === null){ const base = viewDate(); rcYear = base.getUTCFullYear(); rcMonth = base.getUTCMonth(); }
+  $('rcTitle').textContent = `${rcYear}년 ${rcMonth + 1}월`;
+  const first = new Date(Date.UTC(rcYear, rcMonth, 1));
+  const daysInMonth = new Date(Date.UTC(rcYear, rcMonth + 1, 0)).getUTCDate();
+  const monthPrefix = `${rcYear}-${String(rcMonth + 1).padStart(2, '0')}`;
+  if(rcSelected && !rcSelected.startsWith(monthPrefix)) rcSelected = null;
+  if(!rcSelected && fmt(realToday).startsWith(monthPrefix)) rcSelected = fmt(realToday);
+
+  const ICONS = { achieved: '✓', partial: '△', missed: '✕', today: '●' };
+  const CLS = { achieved: 'cal-achieved', partial: 'cal-partial', missed: 'cal-missed', today: 'cal-today', rest: 'cal-rest', future: 'cal-future' };
+  let mTotal = 0, mChecked = 0, nFull = 0, nPartial = 0, nMissed = 0;
+  const cells = [];
+  for(let i = 0; i < first.getUTCDay(); i++) cells.push('<div class="cal-cell cal-blank"></div>');
+  for(let day = 1; day <= daysInMonth; day++){
+    const date = new Date(Date.UTC(rcYear, rcMonth, day));
+    const info = reviewDayInfo(date);
+    if(date <= realToday && info.status !== 'rest'){
+      mTotal += info.total; mChecked += info.checked;
+      if(info.status === 'achieved') nFull++;
+      else if(info.status === 'partial') nPartial++;
+      else if(info.status === 'missed') nMissed++;
+    }
+    const pct = info.total ? Math.round(info.checked / info.total * 100) : 0;
+    const cls = ['cal-cell', CLS[info.status]];
+    if(info.isToday && info.status !== 'today') cls.push('cal-today');
+    if(rcSelected === info.dStr) cls.push('cal-selected');
+    const body = info.total ? `
+        <div>
+          <div class="rc-count">${info.checked}/${info.total}</div>
+          <div class="rc-bar"><i style="width:${pct}%"></i></div>
+          <div class="rc-pct">${pct}%</div>
+        </div>` : '<div></div>';
+    cells.push(`
+      <div class="${cls.join(' ')}" data-date="${info.dStr}" title="${md(info.dStr)} · 복습 ${info.checked}/${info.total}">
+        <div class="cal-top"><span>${day}</span><span class="cal-icon">${ICONS[info.status] || ''}</span></div>
+        ${body}
+      </div>`);
+  }
+  grid.innerHTML = cells.join('');
+  const mPct = mTotal ? Math.round(mChecked / mTotal * 100) : 0;
+  $('rcSummary').innerHTML = `
+    <span class="cal-badge" style="background:var(--progress-soft); color:var(--progress);">이번 달 복습 달성률 ${mPct}% (${mChecked}/${mTotal})</span>
+    <span class="cal-badge" style="background:var(--progress-soft); color:var(--progress);">✓ 전부 ${nFull}일</span>
+    <span class="cal-badge" style="background:var(--goal-soft); color:#8A5A00;">△ 일부 ${nPartial}일</span>
+    <span class="cal-badge" style="background:var(--behind-soft); color:var(--behind);">✕ 못 함 ${nMissed}일</span>`;
+  renderReviewCalendarDetail();
+}
+
+function renderReviewCalendarDetail(){
+  const box = $('rcDetail');
+  if(!box) return;
+  if(!rcSelected){ box.innerHTML = `<div style="color:var(--ink-soft);">날짜를 누르면 그날 해야 할 복습이 보여요.</div>`; return; }
+  const date = toDate(rcSelected);
+  const info = reviewDayInfo(date);
+  const repeats = (s) => subjectRepeats(s);
+  const STATUS_TEXT = {
+    achieved: '<span class="cal-ok">✓ 복습 전부 완료</span>', partial: '<span style="color:#B26A00; font-weight:600;">△ 일부 완료</span>',
+    missed: '<span class="cal-no">✕ 못 함</span>', today: '<b>● 오늘 진행 중</b>',
+    future: '<span style="color:var(--ink-soft);">예정</span>', rest: '<span style="color:var(--ink-soft);">복습할 것 없음</span>'
+  };
+  const rows = info.groups.filter(g => g.items.length).map(g => g.items.map(({ s, range, done }) => {
+    const rt = (r) => repeats(s) > 1 ? `${r}회독 ` : '';
+    const label = range.startPos.round === range.endPos.round
+      ? `${rt(range.startPos.round)}${range.startPos.page}p ~ ${range.endPos.page}p`
+      : `${rt(range.startPos.round)}${range.startPos.page}p ~ ${s.totalPages}p 이어서 ${rt(range.endPos.round)}1p ~ ${range.endPos.page}p`;
+    const mark = done ? ' <span class="cal-ok">✓</span>' : (info.status === 'future' ? '' : ' <span class="cal-no">✕</span>');
+    return `<div class="cal-detail-row"><span>${g.offset}일 전 (${md(fmt(g.src))}) · ${s.name}</span><span>${label}${mark}</span></div>`;
+  }).join('')).join('');
+  box.innerHTML = `
+    <div class="cal-detail-box">
+      <div class="cal-detail-title">${date.getUTCMonth() + 1}월 ${date.getUTCDate()}일 (${KOREAN_WEEKDAYS[date.getUTCDay()]}) · ${STATUS_TEXT[info.status] || ''}${info.total ? ` · ${info.checked}/${info.total}` : ''}</div>
+      ${rows || `<div style="color:var(--ink-soft);">이 날은 복습할 내용이 없어요.</div>`}
+      ${info.total ? `<button type="button" class="link-btn" id="rcGoDateBtn" data-date="${info.dStr}" style="margin-top:8px;">이 날짜로 이동해서 체크하기</button>` : ''}
+    </div>`;
+}
+
+$('rcGrid').addEventListener('click', (e) => {
+  const cell = e.target.closest('.cal-cell[data-date]');
+  if(!cell) return;
+  rcSelected = cell.dataset.date;
+  renderReviewCalendar();
+});
+$('rcDetail').addEventListener('click', (e) => {
+  const btn = e.target.closest('#rcGoDateBtn');
+  if(!btn) return;
+  applyDate(btn.dataset.date);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+function shiftReviewCalendarMonth(delta){
+  const d = new Date(Date.UTC(rcYear, rcMonth + delta, 1));
+  rcYear = d.getUTCFullYear(); rcMonth = d.getUTCMonth(); rcSelected = null;
+  renderReviewCalendar();
+}
+$('rcPrevBtn').onclick = () => shiftReviewCalendarMonth(-1);
+$('rcNextBtn').onclick = () => shiftReviewCalendarMonth(1);
+$('rcTodayBtn').onclick = () => { rcYear = null; rcMonth = null; rcSelected = null; renderReviewCalendar(); };
+
+function renderSubjectProgressList(){
+  $('subjectProgressList').innerHTML = plan.subjects.map(s => {
+    const repeats = subjectRepeats(s);
+    const st = subjectStats(s);
+    const repeatNote = repeats > 1 ? ` (${s.totalPages}p × ${repeats}회독)` : '';
+    const diff = st.pct - st.idealPct;
+    const diffText = `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}%p`;
+    const onTrack = st.remainingPages === 0 || diff >= 0;
+    let roundMarks = '';
+    let roundLabels = '';
+    if(repeats > 1){
+      for(let r = 1; r < repeats; r++){
+        roundMarks += `<div class="ruler-round-mark" style="left:${(r / repeats) * 100}%"></div>`;
+      }
+      for(let r = 1; r <= repeats; r++){
+        const center = ((r - 0.5) / repeats) * 100;
+        roundLabels += `<span style="left:${center}%">${r}회독</span>`;
+      }
+    }
+    return `
+      <div class="subject-progress-block ${onTrack ? 'spb-ontrack' : ''}">
+        ${onTrack ? `<div class="goal-achieved-badge">${st.remainingPages === 0 ? '✓ 완료!' : '✓ 계획대로 진행 중'}</div>` : ''}
+        <div class="spb-name">${s.name} <span class="spb-pace">· 실적 ${st.pct.toFixed(1)}% / 목표 ${st.idealPct.toFixed(1)}% (${diffText})</span></div>
+        <div class="pct-big"><b>${st.pct.toFixed(1)}%</b> 완료 · ${Math.round(st.doneToDate)} / ${st.target}p${repeatNote}</div>
+        <div class="ruler">
+          <div class="ruler-track">
+            <div class="ruler-fill" style="width:${Math.min(100, st.pct)}%"></div>
+            ${roundMarks}
+            <div class="ruler-ideal-mark" style="left:${Math.min(100, st.idealPct)}%"></div>
+          </div>
+          ${repeats > 1 ? `<div class="ruler-round-labels">${roundLabels}</div>` : `<div class="ruler-ticks"><span>0</span><span>${st.target}p</span></div>`}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+const SUBJECT_COLORS = ['#2F6F4F', '#D98E3B', '#3B6FA0', '#B0568C', '#5C8A3A', '#A0522D', '#4A7A8C', '#8A5FA0'];
+
+function renderTodayProgressList(){
+  const todayStr = fmt(viewDate());
+  $('todayProgressList').innerHTML = plan.subjects.map((s, i) => {
+    const st = subjectStats(s);
+    const doneToday = Number((logs[s.id] || {})[todayStr]) || 0;
+    const color = SUBJECT_COLORS[i % SUBJECT_COLORS.length];
+    let pct;
+    if(st.remainingPages === 0){
+      pct = 100;
+    } else if(st.todayGoal === 0){
+      pct = doneToday > 0 ? 100 : 0;
+    } else {
+      pct = Math.min(100, (doneToday / st.todayGoal) * 100);
+    }
+
+    const ratio = st.idealPct > 0 ? (st.pct / st.idealPct) * 100 : (st.pct > 0 ? 100 : 0);
+    const achieved = pct >= 100;
+
+    return `
+      <div class="today-compact-row ${achieved ? 'tcr-achieved' : ''}">
+        <span class="tcr-name">${s.name}${achieved ? ' <span class="tcr-check">✓</span>' : ''}</span>
+        <div class="tcr-metric">
+          <span class="tcr-label">오늘</span>
+          <div class="tcr-bar-track"><div class="tcr-bar-fill" style="width:${pct}%; background:${achieved ? '#FFB300' : color};"></div></div>
+          <span class="tcr-pct">${pct.toFixed(0)}%</span>
+        </div>
+        <div class="tcr-metric">
+          <span class="tcr-label">계획대비</span>
+          <div class="tcr-bar-track"><div class="tcr-bar-fill" style="width:${Math.min(100, ratio)}%; background:${color}; opacity:0.55;"></div></div>
+          <span class="tcr-pct">${ratio.toFixed(0)}%</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+let roundJumpArmedKey = null, roundJumpArmTimer = null;
+async function saveReachedPage(subjectId, reachedPage){
+  const date = fmt(viewDate());
+  const subject = plan.subjects.find(s => s.id === subjectId);
+  if(!subject) return;
+  if(!date){ alert('날짜를 선택하세요.'); return false; }
+  if(isNaN(reachedPage) || reachedPage < 1 || reachedPage > subject.totalPages){
+    alert(`1 ~ ${subject.totalPages} 사이의 페이지 번호를 입력하세요.`);
+    return false;
+  }
+  const prevCumulative = cumulativeBefore(subjectId, date);
+  const newCumulative = reachedPageToCumulative(reachedPage, subject.totalPages, prevCumulative);
+  const delta = Math.max(0, newCumulative - prevCumulative);
+
+  // 안전장치 1: 목표 회독을 넘어가는 기록은 막기 (오타로 '완료' 처리되는 걸 방지)
+  if(newCumulative > subjectTarget(subject)){
+    alert(`목표 회독(${subjectRepeats(subject)}회독)을 넘어가는 기록이에요. 페이지를 다시 확인해 주세요.`);
+    return false;
+  }
+  // 안전장치 2: 직전 기록보다 작은 페이지는 '다음 회독으로 넘어감'으로 계산되므로 한 번 더 확인
+  const prevPageInRound = prevCumulative > 0 ? ((prevCumulative - 1) % subject.totalPages) + 1 : 0;
+  if(reachedPage < prevPageInRound && prevPageInRound < subject.totalPages){
+    const armKey = `${subjectId}_${date}_${reachedPage}`;
+    if(roundJumpArmedKey !== armKey){
+      roundJumpArmedKey = armKey;
+      clearTimeout(roundJumpArmTimer);
+      roundJumpArmTimer = setTimeout(() => { roundJumpArmedKey = null; }, 8000);
+      const nextRound = Math.floor((prevCumulative - 1) / subject.totalPages) + 2;
+      alert(`직전 기록(${prevPageInRound}p)보다 작은 페이지예요. ${nextRound}회독으로 넘어간 게 맞다면 같은 값으로 한 번 더 눌러주세요.`);
+      return false;
+    }
+  }
+  roundJumpArmedKey = null;
+
+  if(!logs[subjectId]) logs[subjectId] = {};
+  logs[subjectId][date] = delta;
+  await saveLogs();
+  renderAllGoals();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderReviewChecklist();
+  renderReviewFullGrid();
+  renderSummaryStats();
+}
+
+$('allGoalsList').addEventListener('click', async (e) => {
+  const saveBtn = e.target.closest('.save-reach-btn');
+  if(saveBtn){
+    const subjectId = saveBtn.dataset.subjectId;
+    const input = document.querySelector(`.reach-input[data-subject-id="${subjectId}"]`);
+    const reachedPage = parseInt(input.value, 10);
+    const ok = await saveReachedPage(subjectId, reachedPage);
+    if(input && ok !== false) input.value = '';
+    return;
+  }
+  const delBtn = e.target.closest('.mini-log-delete');
+  if(delBtn){
+    const subjectId = delBtn.dataset.subjectId;
+    const date = delBtn.dataset.date;
+    if(logs[subjectId]) delete logs[subjectId][date];
+    await saveLogs();
+    renderAllGoals();
+    renderSubjectProgressList();
+    renderTodayProgressList();
+    renderReviewChecklist();
+    renderReviewFullGrid();
+    renderSummaryStats();
+    return;
+  }
+  const editBtn = e.target.closest('.mini-log-edit');
+  if(editBtn){
+    const subjectId = editBtn.dataset.subjectId;
+    const date = editBtn.dataset.date;
+    const page = editBtn.dataset.page;
+    applyDate(date);
+    const input = document.querySelector(`.reach-input[data-subject-id="${subjectId}"]`);
+    if(input){
+      input.value = page;
+      input.focus();
+    }
+    showToast(`${date} 기록을 수정할 수 있어요. 값을 바꾸고 "기록"을 누르세요.`);
+    return;
+  }
+  const toggleBtn = e.target.closest('.past-log-toggle');
+  if(toggleBtn){
+    const list = toggleBtn.nextElementSibling;
+    if(list) list.classList.toggle('hidden');
+  }
+});
+
+$('allGoalsList').addEventListener('keydown', async (e) => {
+  if(e.key === 'Enter' && e.target.classList.contains('reach-input')){
+    e.preventDefault();
+    const subjectId = e.target.dataset.subjectId;
+    const reachedPage = parseInt(e.target.value, 10);
+    const ok = await saveReachedPage(subjectId, reachedPage);
+    if(ok !== false) e.target.value = '';
+  }
+});
+
+function syncPeriodInputs(){
+  if(!plan) return;
+  $('startDateTop').value = plan.startDate;
+  $('endDateTop').value = plan.endDate;
+}
+$('applyPeriodBtn').onclick = async () => {
+  const newStart = $('startDateTop').value;
+  const newEnd = $('endDateTop').value;
+  if(!newStart || !newEnd){ alert('시작일과 종료일을 입력하세요.'); return; }
+  if(toDate(newEnd) < toDate(newStart)){ alert('종료일은 시작일보다 빠를 수 없어요.'); return; }
+  plan.startDate = newStart;
+  plan.endDate = newEnd;
+  await savePlan();
+  refreshAll();
+};
+
+function showDashboard(){
+  $('dashboardView').classList.remove('hidden');
+  renderMotivationQuote();
+  appliedDateStr = fmt(todayUTC());
+  $('logDate').value = appliedDateStr;
+  updateLogDateWeekday();
+  syncReviewDateInput();
+  syncPeriodInputs();
+  renderTopBar();
+  renderSummaryStats();
+  renderSubjectEditList();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderAllGoals();
+  renderReviewChecklist();
+  renderReviewFullGrid();
+}
+
+function refreshAll(){
+  syncPeriodInputs();
+  renderTopBar();
+  renderSummaryStats();
+  renderSubjectEditList();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderAllGoals();
+  renderReviewChecklist();
+  renderReviewFullGrid();
+}
+
+$('applySubjectEditsBtn').onclick = async () => {
+  let hadInvalid = false;
+
+  // 1) apply name changes
+  for(const s of plan.subjects){
+    const nameInput = document.querySelector(`.ser-name-input[data-subject-id="${s.id}"]`);
+    if(!nameInput) continue;
+    const newName = cleanName(nameInput.value);
+    if(!newName){ nameInput.value = s.name; continue; }
+    if(newName !== s.name && plan.subjects.some(other => other.id !== s.id && other.name === newName)){
+      hadInvalid = true;
+      nameInput.value = s.name;
+      continue;
+    }
+    s.name = newName;
+  }
+
+  // 2) apply all "전체 페이지" changes, but never let it drop below pages already read
+  // (that would make progress read over 100% and make round math wrong for past entries).
+  for(const s of plan.subjects){
+    const pagesInput = document.querySelector(`.ser-pages[data-subject-id="${s.id}"]`);
+    const repeatsInput = document.querySelector(`.ser-repeats[data-subject-id="${s.id}"]`);
+    if(!pagesInput) continue;
+    let pages = parseInt(pagesInput.value, 10);
+    let reps = repeatsInput ? parseInt(repeatsInput.value, 10) : subjectRepeats(s);
+    if(!pages || pages < 1){ pagesInput.value = s.totalPages; pages = s.totalPages; }
+    if(!reps || reps < 1){ if(repeatsInput) repeatsInput.value = subjectRepeats(s); reps = subjectRepeats(s); }
+    if(pages !== s.totalPages || reps !== subjectRepeats(s)){
+      const currentDone = subjectStats(s).doneToDate;
+      if(pages * reps < currentDone){
+        hadInvalid = true;
+        pagesInput.value = s.totalPages;
+        if(repeatsInput) repeatsInput.value = subjectRepeats(s);
+        continue;
+      }
+    }
+    s.totalPages = pages;
+    s.repeats = reps;
+  }
+
+  // 3) apply "기존 진행 페이지" as a flat baseline on the subject — NOT a dated log entry.
+  // This avoids it showing up as a huge one-day log ("+54p" on a single date) since it
+  // represents progress made before tracking started, not something done on any one day.
+  for(const s of plan.subjects){
+    const existingInput = document.querySelector(`.ser-existing[data-subject-id="${s.id}"]`);
+    if(!existingInput) continue;
+    const roundInput = document.querySelector(`.ser-existing-round[data-subject-id="${s.id}"]`);
+    const raw = existingInput.value;
+    const rawRound = roundInput ? roundInput.value : '';
+    if(raw === '' && (rawRound === '' || parseInt(rawRound, 10) <= 1)){ s.baseline = 0; continue; }
+
+    const existingPage = raw === '' ? 0 : parseInt(raw, 10);
+    const existingRound = rawRound === '' ? 1 : parseInt(rawRound, 10);
+    if(isNaN(existingPage) || existingPage < 0 || existingPage > s.totalPages ||
+       isNaN(existingRound) || existingRound < 1 || existingRound > subjectRepeats(s) ||
+       (existingRound - 1) * s.totalPages + existingPage > subjectTarget(s)){
+      hadInvalid = true;
+      continue;
+    }
+    s.baseline = (existingRound - 1) * s.totalPages + existingPage;
+  }
+
+  // 4) apply study weekdays (at least one day must stay selected)
+  for(const s of plan.subjects){
+    const mainRow = document.querySelector(`.ser-days-main[data-subject-id="${s.id}"]`);
+    if(!mainRow) continue;
+    const chips = mainRow.querySelectorAll('.ser-day.on');
+    if(!chips.length){ hadInvalid = true; continue; }
+    s.studyDays = [...chips].map(c => parseInt(c.dataset.day, 10)).sort((a, b) => a - b);
+    const altRow = document.querySelector(`.ser-days-alt[data-subject-id="${s.id}"]`);
+    if(altRow && !altRow.classList.contains('hidden')){
+      const altChips = altRow.querySelectorAll('.ser-day.on');
+      if(!altChips.length){ hadInvalid = true; }
+      else s.studyDaysAlt = [...altChips].map(c => parseInt(c.dataset.day, 10)).sort((a, b) => a - b);
+    } else {
+      s.studyDaysAlt = null;
+    }
+  }
+  await savePlan();
+
+  showToast(hadInvalid ? '일부 값은 반영되지 않았어요 (이미 읽은 분량보다 적거나, 현재 회독·페이지가 범위를 벗어나거나, 이름이 중복되거나, 공부 요일이 하나도 선택되지 않았어요).' : '과목별 설정을 모두 적용했어요.');
+  renderSubjectEditList();
+  renderSubjectProgressList();
+  renderTodayProgressList();
+  renderAllGoals();
+  renderReviewChecklist();
+  renderReviewFullGrid();
+  renderSummaryStats();
+};
+
+// ---------- default plan (used when no saved data exists yet, e.g. storage unavailable) ----------
+function defaultPlan(){
+  return {
+    startDate: '2026-08-23',
+    endDate: '2027-04-30',
+    repeats: 5,
+    subjects: [
+      { id: 's_labor366', name: '노동법', totalPages: 366, repeats: 5 },
+      { id: 's_civil585', name: '민법', totalPages: 585, repeats: 5 },
+      { id: 's_social470', name: '사회보험법', totalPages: 470, repeats: 5 },
+      { id: 's_biz657', name: '경영학원론', totalPages: 657, repeats: 5 }
+    ]
+  };
+}
+
+// ---------- init ----------
+(async function init(){
+  await loadState();
+  if(!plan || !plan.subjects || !plan.subjects.length){
+    plan = defaultPlan();
+    plan.subjects.forEach(s => { if(!logs[s.id]) logs[s.id] = {}; });
+  }
+  // Older saved data has no studyDays: fill them in (월~금, 경영학 월수금, 사회보험 화목)
+  // without touching any logged progress, then persist.
+  ensureStudyDays();
+  ensureRepeats();
+  await savePlan();
+  await saveLogs();
+  activeSubjectId = plan.subjects[0].id;
+  showDashboard();
+})();
+</script>
+</body>
+</html>
+
