@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --paper: #EFF3F0;
@@ -430,6 +433,14 @@
   .ov-item .ov-pct{width:44px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:13px; flex-shrink:0;}
   .ov-item .ov-detail{width:76px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); flex-shrink:0;}
 
+  .login-gate{
+    position:fixed; inset:0; z-index:3000; display:flex; align-items:center; justify-content:center;
+    padding:20px; background:var(--paper);
+  }
+  .login-box{
+    width:100%; max-width:360px; text-align:center; background:var(--card);
+    border:1px solid var(--line); border-radius:var(--radius); padding:28px 22px;
+  }
   .hidden{display:none !important;}
   .link-btn{background:none; border:none; color:var(--progress); font-size:13px; font-weight:600; cursor:pointer; padding:0;}
 </style>
@@ -521,6 +532,7 @@
         <button type="button" class="link-btn" id="importBackupBtn">가져오기</button>
         <input type="file" id="importBackupFile" accept="application/json" class="hidden">
         <button type="button" class="link-btn" id="resetDefaultBtn" style="color:var(--behind);">기본값으로 재설정</button>
+        <button type="button" class="link-btn hidden" id="logoutBtn" style="margin-left:auto;">로그아웃</button>
       </div>
     </div>
 
@@ -621,6 +633,15 @@
 
 </div>
 
+<div id="loginGate" class="login-gate hidden">
+  <div class="login-box">
+    <div class="app-title" style="margin-bottom:10px;">효정 노무사 공부 진도율</div>
+    <div id="loginMsg" class="app-sub" style="margin-bottom:18px; line-height:1.6;"></div>
+    <button type="button" id="loginBtn" class="hidden">구글로 로그인</button>
+    <button type="button" id="loginRetryBtn" class="ghost hidden">다시 시도</button>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
@@ -655,6 +676,150 @@ if(typeof window.storage === 'undefined'){
     }
   };
 }
+
+// ============================================================
+// 클라우드 동기화 (Firebase: 구글 로그인 + Firestore)
+// FIREBASE_CONFIG 를 채우면 PC·모바일이 같은 기록을 공유해요.
+// 비워 두면(기본값) 예전처럼 이 기기 브라우저에만 저장돼요.
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyB4xyqRyraV4djEky-uVY0ffz-TFeBPMSI',
+  authDomain: 'study-1797f.firebaseapp.com',
+  projectId: 'study-1797f',
+  appId: '1:126518924666:web:3b74a1e63042d4401cb2c3'
+};
+const CLOUD_ENABLED = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && typeof firebase !== 'undefined');
+const CLOUD_KEYS = ['plan', 'logs', 'reviewChecks'];
+const cloudCache = {};
+let cloudDoc = null;
+let cloudAuth = null;
+
+if(CLOUD_ENABLED){
+  const baseStorage = window.storage;
+  window.storage = {
+    async get(key, shared){
+      if(shared || !CLOUD_KEYS.includes(key)) return baseStorage.get(key, shared);
+      const raw = cloudCache[key];
+      if(raw === undefined || raw === null) throw new Error('not found');
+      return { key, value: raw, shared: false };
+    },
+    async set(key, value, shared){
+      if(shared || !CLOUD_KEYS.includes(key)) return baseStorage.set(key, value, shared);
+      cloudCache[key] = value;
+      try{ await baseStorage.set(key, value, false); }catch(e){}   // 이 기기에도 백업본 보관
+      if(cloudDoc){
+        try{
+          await cloudDoc.set({ [key]: value, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        }catch(e){
+          console.warn('클라우드 저장 실패:', e);
+          showToast('클라우드 저장에 실패했어요. 인터넷 연결을 확인해주세요.');
+        }
+      }
+      return { key, value, shared: false };
+    },
+    delete: (k, s) => baseStorage.delete(k, s),
+    list: (p, s) => baseStorage.list(p, s)
+  };
+}
+
+function setGate(state, msg){
+  const gate = document.getElementById('loginGate');
+  if(!gate) return;
+  gate.classList.toggle('hidden', state === 'off');
+  document.getElementById('loginMsg').textContent = msg || '';
+  document.getElementById('loginBtn').classList.toggle('hidden', state !== 'login');
+  document.getElementById('loginRetryBtn').classList.toggle('hidden', state !== 'retry');
+}
+
+// 로그인 확인 → 클라우드 데이터를 불러온 뒤 true 를 돌려줘요. 실패하면 앱을 시작하지 않아요
+// (불러오기 실패 상태에서 기본값이 클라우드를 덮어쓰는 사고를 막기 위해).
+function cloudStart(){
+  return new Promise((resolve) => {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    cloudAuth = firebase.auth();
+    const db = firebase.firestore();
+    let busy = false;
+
+    async function loadForUser(user){
+      if(busy) return;
+      busy = true;
+      setGate('wait', '기록을 불러오는 중…');
+      try{
+        cloudDoc = db.collection('users').doc(user.uid);
+        const snap = await cloudDoc.get({ source: 'server' });
+        const remote = snap.exists ? snap.data() : {};
+        const upload = {};
+        CLOUD_KEYS.forEach((k) => {
+          if(typeof remote[k] === 'string'){
+            cloudCache[k] = remote[k];
+          }else{
+            // 클라우드가 비어 있으면, 이 기기에 있던 기록을 처음 한 번 올려요
+            const local = localStorage.getItem('sptracker_' + k);
+            if(local !== null){ cloudCache[k] = local; upload[k] = local; }
+          }
+        });
+        if(Object.keys(upload).length){
+          await cloudDoc.set({ ...upload, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        }
+        setGate('off');
+        const lo = document.getElementById('logoutBtn');
+        if(lo) lo.classList.remove('hidden');
+        busy = false;
+        resolve(true);
+      }catch(e){
+        console.warn('클라우드 불러오기 실패:', e);
+        busy = false;
+        cloudDoc = null;
+        setGate('retry', '기록을 불러오지 못했어요. 인터넷 연결을 확인하고 다시 시도해주세요.');
+        document.getElementById('loginRetryBtn').onclick = () => loadForUser(user);
+      }
+    }
+
+    cloudAuth.onAuthStateChanged((user) => {
+      if(user) loadForUser(user);
+      else setGate('login', '구글 계정으로 로그인하면 PC와 모바일 기록이 연동돼요.');
+    });
+    document.getElementById('loginBtn').onclick = async () => {
+      try{
+        await cloudAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      }catch(e){
+        console.warn('로그인 실패:', e);
+        showToast('로그인에 실패했어요. 팝업 차단을 확인하고 다시 눌러주세요.');
+      }
+    };
+    const lo = document.getElementById('logoutBtn');
+    if(lo) lo.onclick = async () => { await cloudAuth.signOut(); location.reload(); };
+  });
+}
+
+// 다른 기기에서 기록한 내용을 이 화면으로 가져와요 (탭/앱으로 돌아왔을 때 한 번)
+async function cloudRefresh(){
+  if(!cloudDoc) return false;
+  try{
+    const snap = await cloudDoc.get({ source: 'server' });
+    if(!snap.exists) return false;
+    const remote = snap.data();
+    let changed = false;
+    CLOUD_KEYS.forEach((k) => {
+      if(typeof remote[k] === 'string' && remote[k] !== cloudCache[k]){ cloudCache[k] = remote[k]; changed = true; }
+    });
+    return changed;
+  }catch(e){ return false; }
+}
+let appReady = false;
+document.addEventListener('visibilitychange', async () => {
+  if(!CLOUD_ENABLED || !appReady || document.visibilityState !== 'visible') return;
+  if(await cloudRefresh()){
+    const keep = activeSubjectId;
+    await loadState();
+    ensureStudyDays();
+    ensureRepeats();
+    if(keep && plan.subjects.some(s => s.id === keep)) activeSubjectId = keep;
+    else activeSubjectId = plan.subjects[0].id;
+    showDashboard();
+    showToast('다른 기기의 최신 기록을 불러왔어요.');
+  }
+});
 
 const $ = (id) => document.getElementById(id);
 let plan = null;          // { startDate, endDate, subjects: [{id,name,totalPages}] }
@@ -2319,6 +2484,10 @@ function defaultPlan(){
 
 // ---------- init ----------
 (async function init(){
+  if(CLOUD_ENABLED){
+    setGate('wait', '로그인 확인 중…');
+    await cloudStart();
+  }
   await loadState();
   if(!plan || !plan.subjects || !plan.subjects.length){
     plan = defaultPlan();
@@ -2332,8 +2501,8 @@ function defaultPlan(){
   await saveLogs();
   activeSubjectId = plan.subjects[0].id;
   showDashboard();
+  appReady = true;
 })();
 </script>
 </body>
 </html>
-
