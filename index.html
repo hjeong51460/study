@@ -573,7 +573,7 @@
           <button type="button" class="subtle" id="reviewDateTodayBtn" style="padding:10px 14px;">오늘</button>
         </div>
         <div style="font-size:13px; color:#8A6D00; margin-bottom:16px; line-height:1.5;">
-          1일 전 · 4일 전 · 7일 전 · 14일 전에 <b>실제로 공부해서 기록한 분량</b>을 복습하는 날이에요. 그날 기록이 없으면 복습할 내용도 없어요. 기록을 수정하면 복습 범위도 같이 바뀌어요.
+          달력 날짜가 아니라 <b>실제로 공부해서 기록한 날</b>만 세어요. 기록이 없는 날은 건너뛰고, 1·4·7·14번째 전에 공부한 날의 분량을 복습해요. (예: 1일, 4일에만 공부했다면 4일의 '1일 전'은 1일이에요.) 기록을 수정하면 복습 범위도 같이 바뀌어요.
         </div>
         <div id="reviewChecklist" class="subject-progress-grid"></div>
       </div>
@@ -1905,6 +1905,33 @@ $('viewReviewBtn').onclick = () => {
 // ---------- 1-4-7-14 복습 체크리스트 ----------
 const REVIEW_OFFSETS = [1, 4, 7, 14];
 
+// '공부한 날' = 어느 과목이든 페이지를 기록한 날.
+// 1-4-7-14는 달력 날짜가 아니라 이 '공부한 날'만 세요. (기록 없는 날은 건너뜀)
+// 예: 1일, 4일에만 공부했다면 4일의 '1일 전'은 3일이 아니라 1일이에요.
+function studyDateList(){
+  const set = new Set();
+  Object.values(logs).forEach(dayLog => {
+    Object.entries(dayLog || {}).forEach(([d, p]) => { if((Number(p) || 0) > 0) set.add(d); });
+  });
+  return [...set].sort();
+}
+// date(당일 제외) 이전의 공부한 날 중 offset 번째 날짜. 그만큼 공부한 날이 없으면 null.
+function reviewSourceDate(date, offset, list){
+  const arr = list || studyDateList();
+  const dStr = fmt(date);
+  let lo = 0, hi = arr.length;                       // lo = dStr 보다 이른 공부한 날의 개수
+  while(lo < hi){ const mid = (lo + hi) >> 1; if(arr[mid] < dStr) lo = mid + 1; else hi = mid; }
+  const j = lo - offset;
+  return j >= 0 ? toDate(arr[j]) : null;
+}
+// 그날이 '복습하는 날'인지: 오늘(또는 고른 날짜)이거나, 그날 공부 기록이 있거나, 이미 복습을 체크한 날
+function isReviewDay(date, list){
+  const dStr = fmt(date);
+  if(dStr === fmt(viewDate()) || dStr === fmt(todayUTC())) return true;
+  if((list || studyDateList()).includes(dStr)) return true;
+  return REVIEW_OFFSETS.some(o => plan.subjects.some(s => reviewChecks[`${dStr}_${o}_${s.id}`]));
+}
+
 // Computes the page range a subject was SCHEDULED to cover on a given date,
 // based on the original flat daily plan (target / totalDays) — independent of
 // whether the person actually studied that day or not.
@@ -1924,13 +1951,14 @@ function renderReviewChecklist(){
   const todayStr = fmt(today);
   $('reviewDateLabel').textContent = koreanDateLabel(today);
 
+  const studyList = studyDateList();
   $('reviewChecklist').innerHTML = REVIEW_OFFSETS.map(offset => {
-    const sourceDate = new Date(today); sourceDate.setUTCDate(sourceDate.getUTCDate() - offset);
-    const sourceLabel = koreanDateLabel(sourceDate);
+    const sourceDate = reviewSourceDate(today, offset, studyList);
+    const sourceLabel = sourceDate ? koreanDateLabel(sourceDate) : '';
 
-    const items = plan.subjects
+    const items = sourceDate ? plan.subjects
       .map(s => ({ s, range: plannedRangeForDate(s, sourceDate) }))
-      .filter(x => x.range !== null);
+      .filter(x => x.range !== null) : [];
 
     const itemsHtml = items.length ? items.map(({ s, range }) => {
       const repeats = subjectRepeats(s);
@@ -1948,11 +1976,11 @@ function renderReviewChecklist(){
           <input type="checkbox" id="rc_${key}" data-key="${key}" ${checked ? 'checked' : ''}>
           <label for="rc_${key}">${s.name} — ${pageLabel}</label>
         </div>`;
-    }).join('') : `<div class="review-empty">그날은 공부 기록이 없어요.</div>`;
+    }).join('') : `<div class="review-empty">${sourceDate ? '그날은 공부 기록이 없어요.' : '아직 그만큼 공부한 날이 없어요.'}</div>`;
 
     return `
       <div>
-        <div class="review-group-title">${offset}일 전 <span class="rd">(${sourceLabel})</span></div>
+        <div class="review-group-title">${offset}일 전 <span class="rd">${sourceLabel ? `(${sourceLabel})` : ''}</span></div>
         ${itemsHtml}
       </div>`;
   }).join('');
@@ -1989,6 +2017,7 @@ function renderReviewFullGridInner(){
   let totalChecked = 0, totalApplicable = 0;
   const monthTotals = {}; // "2026-08" -> { checked, applicable }
   const rows = [];
+  const studyList = studyDateList();
 
   for(let i = 0; i < totalDays; i++){
     const d = new Date(start); d.setUTCDate(d.getUTCDate() + i);
@@ -1996,9 +2025,10 @@ function renderReviewFullGridInner(){
     const monthKey = dStr.slice(0, 7);
     if(!monthTotals[monthKey]) monthTotals[monthKey] = { checked: 0, applicable: 0 };
 
+    const reviewDay = isReviewDay(d, studyList);
     const cells = REVIEW_OFFSETS.map(offset => {
-      const sourceDate = new Date(d); sourceDate.setUTCDate(sourceDate.getUTCDate() - offset);
-      const applicable = plan.subjects.filter(s => plannedRangeForDate(s, sourceDate) !== null);
+      const sourceDate = reviewDay ? reviewSourceDate(d, offset, studyList) : null;
+      const applicable = sourceDate ? plan.subjects.filter(s => plannedRangeForDate(s, sourceDate) !== null) : [];
       if(applicable.length === 0) return '<td><div class="rg-cell rg-na" title="해당 없음"></div></td>';
       const checkedCount = applicable.filter(s => reviewChecks[`${dStr}_${offset}_${s.id}`]).length;
       totalChecked += checkedCount;
@@ -2037,12 +2067,14 @@ function reviewDayInfo(date){
   const dStr = fmt(date);
   const realToday = todayUTC();
   let total = 0, checked = 0;
+  const studyList = studyDateList();
+  const reviewDay = isReviewDay(date, studyList);
   const groups = REVIEW_OFFSETS.map(offset => {
-    const src = new Date(date); src.setUTCDate(src.getUTCDate() - offset);
-    const items = plan.subjects
+    const src = reviewDay ? reviewSourceDate(date, offset, studyList) : null;
+    const items = src ? plan.subjects
       .map(s => ({ s, range: plannedRangeForDate(s, src) }))
       .filter(x => x.range !== null)
-      .map(x => ({ ...x, done: !!reviewChecks[`${dStr}_${offset}_${x.s.id}`] }));
+      .map(x => ({ ...x, done: !!reviewChecks[`${dStr}_${offset}_${x.s.id}`] })) : [];
     total += items.length;
     checked += items.filter(i => i.done).length;
     return { offset, src, items };
