@@ -575,6 +575,13 @@
         <div style="font-size:13px; color:#8A6D00; margin-bottom:16px; line-height:1.5;">
           달력 날짜가 아니라 <b>실제로 공부해서 기록한 날</b>만 세어요. 기록이 없는 날은 건너뛰고, 1·4·7·14번째 전에 공부한 날의 분량을 복습해요. (예: 1일, 4일에만 공부했다면 4일의 '1일 전'은 1일이에요.) 기록을 수정하면 복습 범위도 같이 바뀌어요.
         </div>
+        <div style="margin-bottom:16px; display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap;">
+          <div style="width:200px;">
+            <label for="backlogFromInput" style="color:#8A6D00;">밀린 복습 표시 시작일</label>
+            <input type="date" id="backlogFromInput">
+          </div>
+          <button type="button" class="subtle" id="backlogFromApplyBtn" style="padding:10px 16px;">적용하기</button>
+        </div>
         <div id="reviewChecklist" class="subject-progress-grid"></div>
       </div>
 
@@ -889,6 +896,8 @@ function ensureStudyDays(){
     if(s.studyDaysAlt === undefined) s.studyDaysAlt = defaultAltStudyDaysFor(s);
     if(Array.isArray(s.studyDaysAlt) && !s.studyDaysAlt.length) s.studyDaysAlt = null;
   });
+  // 밀린 복습을 보여주기 시작할 날짜 (처음엔 오늘부터. 예전 기록까지 보려면 복습 탭에서 날짜를 앞당기면 돼요)
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(plan.reviewBacklogFrom || '')) plan.reviewBacklogFrom = fmt(todayUTC());
 }
 // 과목별 목표 회독수가 없던 옛 데이터: 기존 전체 회독수(plan.repeats)를 각 과목에 복사해 둠.
 function ensureRepeats(){
@@ -1946,13 +1955,65 @@ function plannedRangeForDate(subject, date){
   return { startPos, endPos };
 }
 
+// 복습 분량 표시용 문자열 (예: "2회독 10p ~ 20p")
+function reviewRangeLabel(s, range){
+  const repeats = subjectRepeats(s);
+  const roundTag = (r) => repeats > 1 ? `${r}회독 ` : '';
+  if(range.startPos.round === range.endPos.round){
+    return `${roundTag(range.startPos.round)}${range.startPos.page}p ~ ${range.endPos.page}p`;
+  }
+  return `${roundTag(range.startPos.round)}${range.startPos.page}p ~ ${s.totalPages}p 이어서 ${roundTag(range.endPos.round)}1p ~ ${range.endPos.page}p`;
+}
+
+// 밀린 복습: 공부한 날(D) 중 '표시 시작일' 이후 ~ 기준일 전날까지, 체크 안 하고 넘어간 복습.
+// 체크할 때까지 계속 남아 있고, 체크하면 원래 복습했어야 할 그날의 복습으로 기록돼요.
+function overdueReviews(today, list){
+  const todayStr = fmt(today);
+  const from = plan.reviewBacklogFrom || todayStr;
+  const out = [];
+  list.forEach(dStr => {
+    if(dStr >= todayStr || dStr < from) return;
+    const D = toDate(dStr);
+    REVIEW_OFFSETS.forEach(offset => {
+      const S = reviewSourceDate(D, offset, list);
+      if(!S) return;
+      plan.subjects.forEach(s => {
+        const range = plannedRangeForDate(s, S);
+        if(!range) return;
+        const key = `${dStr}_${offset}_${s.id}`;
+        if(reviewChecks[key]) return;
+        out.push({ key, D, S, offset, s, range });
+      });
+    });
+  });
+  return out;
+}
+let backlogOpen = true;
+
 function renderReviewChecklist(){
   const today = viewDate();
   const todayStr = fmt(today);
   $('reviewDateLabel').textContent = koreanDateLabel(today);
+  const bfIn = $('backlogFromInput');
+  if(bfIn && document.activeElement !== bfIn) bfIn.value = plan.reviewBacklogFrom || '';
 
   const studyList = studyDateList();
-  $('reviewChecklist').innerHTML = REVIEW_OFFSETS.map(offset => {
+  const overdue = overdueReviews(today, studyList);
+  const backlogHtml = overdue.length ? `
+    <div style="grid-column:1 / -1;">
+      <details id="backlogDetails" ${backlogOpen ? 'open' : ''}>
+        <summary class="review-group-title" style="cursor:pointer; color:#C13A2E;">밀린 복습 ${overdue.length}개 <span class="rd">(체크하면 원래 그날 복습으로 기록돼요)</span></summary>
+        <div style="max-height:340px; overflow:auto; margin-top:8px;">
+          ${overdue.map(o => `
+            <div class="review-item">
+              <input type="checkbox" id="rb_${o.key}" data-key="${o.key}">
+              <label for="rb_${o.key}">${o.s.name} — ${reviewRangeLabel(o.s, o.range)} <span class="rd">(${md(fmt(o.S))} 공부분 · ${md(fmt(o.D))}의 ${o.offset}일 전 복습)</span></label>
+            </div>`).join('')}
+        </div>
+      </details>
+    </div>` : '';
+
+  const groupsHtml = REVIEW_OFFSETS.map(offset => {
     const sourceDate = reviewSourceDate(today, offset, studyList);
     const sourceLabel = sourceDate ? koreanDateLabel(sourceDate) : '';
 
@@ -1985,6 +2046,10 @@ function renderReviewChecklist(){
       </div>`;
   }).join('');
 
+  $('reviewChecklist').innerHTML = backlogHtml + groupsHtml;
+  const det = $('backlogDetails');
+  if(det) det.addEventListener('toggle', () => { backlogOpen = det.open; });
+
   [...document.querySelectorAll('#reviewChecklist input[type=checkbox]')].forEach(cb => {
     cb.onchange = async () => {
       const key = cb.dataset.key;
@@ -1996,6 +2061,16 @@ function renderReviewChecklist(){
     };
   });
 }
+
+// 밀린 복습 표시 시작일 바꾸기 (너무 오래된 것은 정리하고, 예전 것을 다시 보고 싶으면 앞당기기)
+$('backlogFromApplyBtn').onclick = async () => {
+  const v = $('backlogFromInput').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)){ showToast('날짜를 골라주세요.'); return; }
+  plan.reviewBacklogFrom = v;
+  await savePlan();
+  renderReviewChecklist();
+  showToast(`${md(v)}부터의 밀린 복습을 보여줘요.`);
+};
 
 function renderReviewFullGrid(){
   renderReviewFullGridInner();
